@@ -41,22 +41,22 @@ import headerDecoration from "figma:asset/1f94cbc6275b0a35eb5a9c6c93b92d94e22510
 type Category = 'watch' | 'movies' | 'games' | 'food' | 'places' | 'dates' | 'jokes' | 'alarm' | 'top3' | 'mural' | 'other';
 
 const categories = [
-  { id: 'watch' as Category, icon: Tv, label: 'Assistir' },
+  { id: 'mural' as Category, icon: Gift, label: 'Mural' },
+  { id: 'alarm' as Category, icon: AlarmClock, label: 'Lembrete' },
+  { id: 'dates' as Category, icon: Calendar, label: 'Datas' },
+  { id: 'jokes' as Category, icon: Smile, label: 'Bobeiras' },
+  { id: 'top3' as Category, icon: Trophy, label: 'Top 3' },
   { id: 'movies' as Category, icon: Film, label: 'Filmes/Séries' },
+  { id: 'watch' as Category, icon: Tv, label: 'Vídeos Curtos' },
   { id: 'games' as Category, icon: Gamepad2, label: 'Jogos' },
   { id: 'food' as Category, icon: UtensilsCrossed, label: 'Comidas' },
   { id: 'places' as Category, icon: MapPin, label: 'Lugares' },
-  { id: 'dates' as Category, icon: Calendar, label: 'Datas' },
-  { id: 'jokes' as Category, icon: Smile, label: 'Bobeiras' },
-  { id: 'alarm' as Category, icon: AlarmClock, label: 'Lembrete' },
-  { id: 'top3' as Category, icon: Trophy, label: 'Top 3' },
-  { id: 'mural' as Category, icon: Gift, label: 'Mural' },
   { id: 'other' as Category, icon: Umbrella, label: 'Outros' },
 ];
 
 export default function Home() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState<Category>('watch');
+  const [activeCategory, setActiveCategory] = useState<Category>('mural');
   const [items, setItems] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -68,6 +68,8 @@ export default function Home() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(false);
+  
+  const userProfile = localStorage.getItem('userProfile') || 'You';
 
   // Realtime Sync - escuta mudanças de outros usuários
   useRealtimeSync({
@@ -151,7 +153,6 @@ export default function Home() {
         
         // Show toast only if this is a silent update and there are changes
         if (silent && hasUpdates && items.length > 0) {
-          const userProfile = localStorage.getItem('userProfile');
           const partnerName = userProfile === 'Amanda' ? 'Mateus' : 'Amanda';
           toast.info(`${partnerName} atualizou a lista! 💕`, { duration: 2000 });
         }
@@ -291,8 +292,6 @@ export default function Home() {
 
 
   const handleAddItem = async (newItem: Partial<ListItem>) => {
-    const userProfile = localStorage.getItem('userProfile') || 'You';
-    
     const item: ListItem = {
       id: Date.now().toString(),
       title: newItem.title || '',
@@ -339,8 +338,6 @@ export default function Home() {
   };
 
   const handleAddMuralPost = async (title: string, contentType: 'text' | 'image' | 'video' | 'audio', content: string) => {
-    const userProfile = localStorage.getItem('userProfile') || 'You';
-    
     const item: ListItem = {
       id: Date.now().toString(),
       title,
@@ -434,6 +431,19 @@ export default function Home() {
   const handleMarkAsPending = async (id: string) => {
     await handleUpdateItem(id, { status: 'pending' });
     setExpandedItemId(null);
+  };
+
+  const handleMarkViewed = async (id: string) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    
+    // Adiciona o usuário atual ao array de visualizações
+    const viewedBy = item.viewedBy || [];
+    if (!viewedBy.includes(userProfile)) {
+      await handleUpdateItem(id, { 
+        viewedBy: [...viewedBy, userProfile] 
+      });
+    }
   };
 
   const filteredItems = items.filter(item => {
@@ -602,6 +612,8 @@ export default function Home() {
                     key={item.id}
                     item={item}
                     onDelete={() => handleDeleteItem(item.id)}
+                    currentUser={userProfile}
+                    onMarkViewed={() => handleMarkViewed(item.id)}
                   />
                 ) : (
                   <ListItemComponent

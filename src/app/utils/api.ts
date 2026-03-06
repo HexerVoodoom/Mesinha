@@ -37,6 +37,7 @@ export interface ListItem {
   // Campos específicos para Mural
   muralContentType?: 'text' | 'image' | 'video' | 'audio';
   muralContent?: string;
+  viewedBy?: string[]; // Lista de usuários que visualizaram o post
 }
 
 export interface Settings {
@@ -134,10 +135,28 @@ export const api = {
 
   getItemPhoto: async (id: string): Promise<string | null> => {
     try {
-      const data = await fetchAPI(`/items/${id}/photo`, {}, 0);
+      // Use timeout menor para fotos (10s) e permite 1 retry
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(`${BASE_URL}/items/${id}/photo`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`,
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        return null;
+      }
+      
+      const data = await response.json();
       return data.photo;
     } catch (error) {
-      console.error(`Failed to load photo for item ${id}:`, error);
+      // Silenciosamente retorna null (sem logs)
       return null;
     }
   },

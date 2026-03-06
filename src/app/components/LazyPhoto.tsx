@@ -51,9 +51,12 @@ export function LazyPhoto({ itemId, hasPhoto, className, alt, onLoad }: LazyPhot
           addToCache(itemId, photoData);
           setPhoto(photoData);
           onLoad?.(photoData);
+        } else if (isMounted && !photoData) {
+          // Silently handle missing photo
+          setError(true);
         }
       } catch (err) {
-        console.error('Failed to load photo:', err);
+        // Silently handle error without logging
         if (isMounted) {
           setError(true);
         }

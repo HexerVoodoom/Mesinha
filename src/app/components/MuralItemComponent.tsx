@@ -11,15 +11,28 @@ import secondaryButtonBg from "figma:asset/75c872bdf2a28b8670edf0ef3851acf422588
 interface MuralItemComponentProps {
   item: ListItem;
   onDelete: () => void;
+  onMarkViewed?: () => void;
+  currentUser: string;
 }
 
-export function MuralItemComponent({ item, onDelete }: MuralItemComponentProps) {
+export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser }: MuralItemComponentProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showExpandedContent, setShowExpandedContent] = useState(false);
 
   // Parse do conteúdo do mural
   const contentType = item.muralContentType || 'text';
   const content = item.muralContent || '';
+
+  // Verifica se é novo para o usuário atual
+  const isNew = item.createdBy !== currentUser && !item.viewedBy?.includes(currentUser);
+
+  const handleOpenContent = () => {
+    setShowExpandedContent(true);
+    // Marca como visualizado quando abre o conteúdo
+    if (isNew && onMarkViewed) {
+      onMarkViewed();
+    }
+  };
 
   const handleDownload = () => {
     const link = document.createElement('a');
@@ -78,7 +91,7 @@ export function MuralItemComponent({ item, onDelete }: MuralItemComponentProps) 
         return (
           <div 
             className="w-full aspect-square bg-[#F8F6F3] rounded-sm overflow-hidden cursor-pointer hover:opacity-95 transition-opacity"
-            onClick={() => setShowExpandedContent(true)}
+            onClick={handleOpenContent}
           >
             <img 
               src={content} 
@@ -92,7 +105,7 @@ export function MuralItemComponent({ item, onDelete }: MuralItemComponentProps) 
         return (
           <div 
             className="w-full aspect-video bg-[#F8F6F3] rounded-sm overflow-hidden relative cursor-pointer group"
-            onClick={() => setShowExpandedContent(true)}
+            onClick={handleOpenContent}
           >
             <video 
               src={content}
@@ -115,7 +128,7 @@ export function MuralItemComponent({ item, onDelete }: MuralItemComponentProps) 
         return (
           <div 
             className="w-full p-6 bg-[#F8F6F3] rounded-sm flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-[#F0EDE9] transition-colors"
-            onClick={() => setShowExpandedContent(true)}
+            onClick={handleOpenContent}
           >
             <div className="w-16 h-16 rounded-full bg-[#81D8D0]/20 flex items-center justify-center">
               <svg className="w-8 h-8 text-[#4D989B]" fill="currentColor" viewBox="0 0 20 20">
@@ -131,7 +144,7 @@ export function MuralItemComponent({ item, onDelete }: MuralItemComponentProps) 
         return (
           <div 
             className="w-full min-h-[120px] p-4 bg-[#F8F6F3] rounded-sm cursor-pointer hover:bg-[#F0EDE9] transition-colors"
-            onClick={() => setShowExpandedContent(true)}
+            onClick={handleOpenContent}
           >
             <p className="text-sm text-[#2B2A28] whitespace-pre-wrap break-words leading-relaxed line-clamp-6">
               {content}
@@ -262,6 +275,34 @@ export function MuralItemComponent({ item, onDelete }: MuralItemComponentProps) 
         >
           <Trash2 className="w-3.5 h-3.5 text-red-500" />
         </button>
+
+        {/* Tag "NOVO" - só aparece para quem não criou e ainda não visualizou */}
+        {isNew && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-2 -right-2 z-20"
+          >
+            <div className="relative">
+              <div className="px-3 py-1 bg-gradient-to-r from-[#4D989B] to-[#81D8D0] text-white text-xs font-bold rounded-full shadow-lg">
+                NOVO
+              </div>
+              {/* Brilho animado */}
+              <motion.div
+                className="absolute inset-0 bg-white/30 rounded-full"
+                animate={{
+                  opacity: [0, 0.6, 0],
+                  scale: [0.8, 1, 0.8],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
 
         {/* Expand button for details */}
         <button

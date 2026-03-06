@@ -3,11 +3,12 @@ import { RouterProvider } from 'react-router';
 import { router } from './routes';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
-import { LoadingSpinner } from './components/LoadingSpinner';
+import { LoadingScreen } from './components/LoadingScreen';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const [userProfile, setUserProfile] = useState<'Amanda' | 'Mateus' | null>(null);
 
   useEffect(() => {
@@ -39,12 +40,17 @@ export default function App() {
     console.log('[App] Authentication state updated');
   };
 
+  const handleLoadingComplete = () => {
+    setShowLoadingScreen(false);
+  };
+
+  // Mostrar loading screen primeiro
+  if (showLoadingScreen) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
+  }
+
   if (isLoading) {
-    return (
-      <div className="min-h-screen w-full bg-[#F8F6F3] flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
+    return null; // Não precisa mostrar nada enquanto carrega após loading screen
   }
 
   if (!isAuthenticated) {

@@ -141,10 +141,11 @@ export function ListItemComponent({
     }
   };
 
-  const isDone = item.status === 'done';
   const isDateCategory = item.category === 'dates';
   const isAlarmCategory = item.category === 'alarm';
   const isJokesCategory = item.category === 'jokes';
+  const isOtherCategory = item.category === 'other';
+  const isDone = item.status === 'done';
   
   const frequencyLabels = {
     daily: 'Diariamente',
@@ -170,8 +171,8 @@ export function ListItemComponent({
       <CardContent className="p-[18px]">
         {/* Main Row */}
         <div className="flex items-start gap-4">
-          {/* Checkbox - não mostrar para categoria dates e jokes (bobeiras) */}
-          {!isDateCategory && !isJokesCategory && (
+          {/* Checkbox - não mostrar para categoria dates, jokes (bobeiras) e other (outros) */}
+          {!isDateCategory && !isJokesCategory && !isOtherCategory && (
             <button
               onClick={() => {
                 if (isAlarmCategory) {
@@ -610,6 +611,27 @@ export function ListItemComponent({
                           </>
                         ) : isJokesCategory ? (
                           // Para categoria jokes (bobeiras): Apenas salvar e excluir (sem marcar como concluído)
+                          <div className="flex gap-3 px-2">
+                            <button
+                              onClick={() => {
+                                handleSave();
+                                onToggleExpand();
+                              }}
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
+                              style={{ backgroundImage: `url(${primaryButtonBg})` }}
+                            >
+                              Salvar
+                            </button>
+                            <button
+                              onClick={() => setShowDeleteConfirmation(true)}
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
+                              style={{ backgroundImage: `url(${secondaryButtonBg})` }}
+                            >
+                              Excluir
+                            </button>
+                          </div>
+                        ) : isOtherCategory ? (
+                          // Para categoria other: Apenas salvar e excluir (sem marcar como concluído)
                           <div className="flex gap-3 px-2">
                             <button
                               onClick={() => {
