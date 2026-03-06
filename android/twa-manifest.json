@@ -1,0 +1,23 @@
+{
+  "packageId": "com.hexervoodoom.mesinha.twa",
+  "host": "hexervoodoom.github.io",
+  "name": "Mesinha",
+  "launcherName": "Mesinha",
+  "themeColor": "#FFFFFF",
+  "navigationColor": "#FFFFFF",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#E9E4DF",
+  "navigationDividerColorDark": "#333333",
+  "backgroundColor": "#FFFFFF",
+  "enableNotifications": true,
+  "startUrl": "/Mesinha/",
+  "iconUrl": "http://localhost:8080/public/pwa-512x512.png",
+  "maskableIconUrl": "http://localhost:8080/public/pwa-512x512.png",
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  }
+}
