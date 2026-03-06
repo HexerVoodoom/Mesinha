@@ -4,6 +4,8 @@ import { router } from './routes';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import { LoadingScreen } from './components/LoadingScreen';
+import { requestNotificationPermission, notifyFromSyncEvent } from './utils/NotificationService';
+import { subscribeToSync } from './utils/realtimeChannel';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,45 +14,56 @@ export default function App() {
   const [userProfile, setUserProfile] = useState<'Amanda' | 'Mateus' | null>(null);
 
   useEffect(() => {
-    // Verificar se já existe um perfil salvo no localStorage
     const initializeApp = async () => {
-      console.log('[App] Initializing app...');
-      
       const profile = localStorage.getItem('userProfile') as 'Amanda' | 'Mateus' | null;
-      console.log('[App] Stored profile:', profile);
 
       if (profile && (profile === 'Amanda' || profile === 'Mateus')) {
-        console.log('[App] Profile found, setting authenticated');
         setIsAuthenticated(true);
         setUserProfile(profile);
-      } else {
-        console.log('[App] No valid profile found');
       }
-      
+
       setIsLoading(false);
     };
 
     initializeApp();
   }, []);
 
+  // When authenticated, request notification permission and subscribe to realtime sync
+  useEffect(() => {
+    if (!isAuthenticated || !userProfile) return;
+
+    // Ask for notification permission
+    requestNotificationPermission().then(permission => {
+      console.log('[App] Notification permission:', permission);
+    });
+
+    // Subscribe to realtime sync and fire notifications on remote changes
+    const unsubscribe = subscribeToSync((event) => {
+      // Only notify if the event came from the OTHER user
+      // We can detect this by checking if the change was made locally (store a flag)
+      notifyFromSyncEvent(event);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isAuthenticated, userProfile]);
+
   const handleLoginSuccess = (profile: 'Amanda' | 'Mateus') => {
-    console.log('[App] Login success callback:', { profile });
     setUserProfile(profile);
     setIsAuthenticated(true);
-    console.log('[App] Authentication state updated');
   };
 
   const handleLoadingComplete = () => {
     setShowLoadingScreen(false);
   };
 
-  // Mostrar loading screen primeiro
   if (showLoadingScreen) {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
   if (isLoading) {
-    return null; // Não precisa mostrar nada enquanto carrega após loading screen
+    return null;
   }
 
   if (!isAuthenticated) {
