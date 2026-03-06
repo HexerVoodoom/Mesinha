@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { 
+import {
   Tv,
   Film,
   Gamepad2,
@@ -10,8 +10,8 @@ import {
   Smile,
   AlarmClock,
   Umbrella,
-  ChevronRight, 
-  Plus, 
+  ChevronRight,
+  Plus,
   Settings as SettingsIcon,
   ChevronDown,
   Filter,
@@ -68,14 +68,14 @@ export default function Home() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(false);
-  
+
   const userProfile = localStorage.getItem('userProfile') || 'You';
 
   // Realtime Sync - escuta mudanças de outros usuários
   useRealtimeSync({
     onSync: (event) => {
       console.log('[Home] Sync event received:', event);
-      
+
       if (event.type === 'item_created') {
         setItems(prev => {
           // Evita duplicatas
@@ -84,7 +84,7 @@ export default function Home() {
         });
         toast.success('Nova lista adicionada! 💕');
       } else if (event.type === 'item_updated') {
-        setItems(prev => prev.map(item => 
+        setItems(prev => prev.map(item =>
           item.id === event.data.id ? event.data : item
         ));
       } else if (event.type === 'item_deleted') {
@@ -108,7 +108,7 @@ export default function Home() {
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -122,15 +122,15 @@ export default function Home() {
 
   useEffect(() => {
     let isActive = true;
-    
+
     const init = async () => {
       if (isActive) {
         await loadItems();
       }
     };
-    
+
     init();
-    
+
     return () => {
       isActive = false;
     };
@@ -141,22 +141,22 @@ export default function Home() {
       // Debug: Check if token exists before making API call
       const token = localStorage.getItem('authToken');
       console.log('[loadItems] Token in localStorage:', token ? `${token.substring(0, 50)}...` : 'MISSING');
-      
+
       const fetchedItems = await api.getItems();
       if (Array.isArray(fetchedItems)) {
         // Check if there are updates (compare with current items)
-        const hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !== 
-                          JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
-        
+        const hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !==
+          JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
+
         // Items come WITHOUT photos - they will be loaded on-demand
         setItems(fetchedItems);
-        
+
         // Show toast only if this is a silent update and there are changes
         if (silent && hasUpdates && items.length > 0) {
           const partnerName = userProfile === 'Amanda' ? 'Mateus' : 'Amanda';
           toast.info(`${partnerName} atualizou a lista! 💕`, { duration: 2000 });
         }
-        
+
         // Save to localStorage for offline mode (without photos to save space)
         try {
           const itemsForStorage = fetchedItems.map(item => ({
@@ -173,7 +173,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Failed to load items:', error);
-      
+
       // Only show error if this is not a silent update
       if (!silent) {
         // Try to load from localStorage
@@ -332,7 +332,7 @@ export default function Home() {
       localStorage.setItem('offlineItems', JSON.stringify(newItems));
       toast.info('Item adicionado localmente (modo offline)');
     }
-    
+
     setShowAddModal(false);
     toast.success('Item adicionado com sucesso!');
   };
@@ -366,16 +366,16 @@ export default function Home() {
       localStorage.setItem('offlineItems', JSON.stringify(newItems));
       toast.info('Post adicionado localmente (modo offline)');
     }
-    
+
     toast.success('Post adicionado ao mural!');
   };
 
   const handleUpdateItem = async (id: string, updates: Partial<ListItem>) => {
     const item = items.find(i => i.id === id);
-    const updatedItems = items.map(item => 
+    const updatedItems = items.map(item =>
       item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item
     );
-    
+
     try {
       const updatedItem = await syncApi.updateItem(id, updates);
       const finalItems = items.map(item => item.id === id ? updatedItem : item);
@@ -386,7 +386,7 @@ export default function Home() {
       // Fallback to offline mode
       setItems(updatedItems);
       localStorage.setItem('offlineItems', JSON.stringify(updatedItems));
-      
+
       // Feedback específico para lembretes ou genérico
       if (item?.category === 'alarm' && 'reminderActive' in updates) {
         toast.info(updates.reminderActive ? 'Lembrete ativado localmente (modo offline)' : 'Lembrete desativado localmente (modo offline)');
@@ -395,7 +395,7 @@ export default function Home() {
       }
       return;
     }
-    
+
     // Feedback específico para lembretes ou genérico
     if (item?.category === 'alarm' && 'reminderActive' in updates) {
       toast.success(updates.reminderActive ? 'Lembrete ativado!' : 'Lembrete desativado!');
@@ -406,7 +406,7 @@ export default function Home() {
 
   const handleDeleteItem = async (id: string) => {
     const filteredItems = items.filter(item => item.id !== id);
-    
+
     try {
       await syncApi.deleteItem(id);
       setItems(filteredItems);
@@ -418,7 +418,7 @@ export default function Home() {
       localStorage.setItem('offlineItems', JSON.stringify(filteredItems));
       toast.info('Item removido localmente (modo offline)');
     }
-    
+
     setExpandedItemId(null);
     toast.success('Item removido!');
   };
@@ -436,12 +436,12 @@ export default function Home() {
   const handleMarkViewed = async (id: string) => {
     const item = items.find(i => i.id === id);
     if (!item) return;
-    
+
     // Adiciona o usuário atual ao array de visualizações
     const viewedBy = item.viewedBy || [];
     if (!viewedBy.includes(userProfile)) {
-      await handleUpdateItem(id, { 
-        viewedBy: [...viewedBy, userProfile] 
+      await handleUpdateItem(id, {
+        viewedBy: [...viewedBy, userProfile]
       });
     }
   };
@@ -456,47 +456,47 @@ export default function Home() {
   });
 
   // Para categoria 'dates', todos os itens são considerados "pending" (não tem separação)
-  const pendingItems = activeCategory === 'dates' 
-    ? filteredItems 
+  const pendingItems = activeCategory === 'dates'
+    ? filteredItems
     : filteredItems.filter(item => item.status === 'pending');
-  const doneItems = activeCategory === 'dates' 
-    ? [] 
+  const doneItems = activeCategory === 'dates'
+    ? []
     : filteredItems.filter(item => item.status === 'done');
 
   const handleSwipe = (offset: number) => {
     const currentIndex = categories.findIndex(cat => cat.id === activeCategory);
     const newIndex = currentIndex + offset;
-    
+
     if (newIndex >= 0 && newIndex < categories.length) {
       setActiveCategory(categories[newIndex].id);
     }
   };
 
   return (
-    <div 
-      className="min-h-screen bg-background flex flex-col font-['Quicksand',sans-serif] relative" 
-      style={{ 
-        maxWidth: 390, 
+    <div
+      className="min-h-screen bg-background flex flex-col font-['Quicksand',sans-serif] relative"
+      style={{
+        maxWidth: 390,
         margin: '0 auto'
       }}
     >
-      {/* Background Texture */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-50"
+      {/* Background Texture - stays behind content */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-20 z-0"
         style={{
           backgroundImage: `url(${grainTexture})`,
           backgroundRepeat: 'repeat',
           backgroundSize: 'auto'
         }}
       />
-      
+
       {/* Header */}
       <header className="bg-transparent pt-8 pb-4 px-6 relative">
         {/* Decorative illustration */}
         <div className="absolute top-2 left-0 right-0 w-full h-[100px] flex items-center justify-center pointer-events-none">
-          <img 
-            src={headerDecoration} 
-            alt="" 
+          <img
+            src={headerDecoration}
+            alt=""
             className="w-full max-w-[600px] h-auto object-contain opacity-60"
           />
         </div>
@@ -510,7 +510,7 @@ export default function Home() {
       </header>
 
       {/* List Content */}
-      <main 
+      <main
         className="flex-1 pb-24"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -539,23 +539,21 @@ export default function Home() {
                   }}
                   className="flex flex-col items-center gap-1"
                 >
-                  <div className={`transition-colors ${
-                    isActive ? 'text-[#4D989B]' : 'text-[#2B2A28]'
-                  }`}>
+                  <div className={`transition-colors ${isActive ? 'text-[#4D989B]' : 'text-[#2B2A28]'
+                    }`}>
                     <Icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                   </div>
                 </button>
               );
             })}
-            
+
             {/* Search Icon */}
             <button
               onClick={() => setShowSearch(!showSearch)}
               className="flex flex-col items-center gap-1"
             >
-              <div className={`transition-colors ${
-                showSearch ? 'text-[#4D989B]' : 'text-[#2B2A28]'
-              }`}>
+              <div className={`transition-colors ${showSearch ? 'text-[#4D989B]' : 'text-[#2B2A28]'
+                }`}>
                 <Search className="w-[20px] h-[20px]" strokeWidth={1.5} />
               </div>
             </button>
@@ -582,7 +580,7 @@ export default function Home() {
             </div>
           </div>
         )}
-        
+
         {loading ? (
           <div className="text-center py-12 text-muted-foreground px-6">Carregando...</div>
         ) : showSearch ? (
@@ -630,7 +628,7 @@ export default function Home() {
                   />
                 )
               ))}
-              
+
               {pendingItems.length === 0 && doneItems.length === 0 && (
                 <EmptyState category={activeCategory} />
               )}
@@ -655,7 +653,7 @@ export default function Home() {
                       )}
                       onUpdate={(updates) => handleUpdateItem(item.id, updates)}
                       onDelete={() => handleDeleteItem(item.id)}
-                      onMarkAsDone={() => {}}
+                      onMarkAsDone={() => { }}
                       onMarkAsPending={() => handleMarkAsPending(item.id)}
                       allItems={items}
                     />
