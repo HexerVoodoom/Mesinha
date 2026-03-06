@@ -94,3 +94,27 @@ export async function notifyFromSyncEvent(event: { type: string; data?: any }) {
 
     await showNotification(title, body, { tag: event.type });
 }
+
+/**
+ * Send user credentials to the Service Worker so it can fetch
+ * alarms autonomously in the background.
+ */
+export async function sendUserConfigToSW(
+    userProfile: string,
+    baseUrl: string,
+    anonKey: string
+) {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        registration.active?.postMessage({
+            type: 'SET_USER_CONFIG',
+            userProfile,
+            baseUrl,
+            anonKey,
+        });
+        console.log('[Notifications] Sent user config to SW:', userProfile);
+    } catch (error) {
+        console.warn('[Notifications] Could not send config to SW:', error);
+    }
+}

@@ -9,8 +9,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      injectManifest: {
+        swDest: 'dist/sw.js',
+      },
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: "Mesinha",
         short_name: "Mesinha",

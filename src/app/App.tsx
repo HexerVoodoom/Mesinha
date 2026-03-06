@@ -4,8 +4,9 @@ import { router } from './routes';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import { LoadingScreen } from './components/LoadingScreen';
-import { requestNotificationPermission, notifyFromSyncEvent } from './utils/NotificationService';
+import { requestNotificationPermission, notifyFromSyncEvent, sendUserConfigToSW } from './utils/NotificationService';
 import { subscribeToSync } from './utils/realtimeChannel';
+import { projectId, publicAnonKey } from '/utils/supabase/info';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,13 +35,15 @@ export default function App() {
 
     // Ask for notification permission
     requestNotificationPermission().then(permission => {
-      console.log('[App] Notification permission:', permission);
+      if (permission === 'granted') {
+        // Send user config to Service Worker for scheduled alarm checking
+        const baseUrl = `https://${projectId}.supabase.co/functions/v1/make-server-19717bce`;
+        sendUserConfigToSW(userProfile, baseUrl, publicAnonKey);
+      }
     });
 
     // Subscribe to realtime sync and fire notifications on remote changes
     const unsubscribe = subscribeToSync((event) => {
-      // Only notify if the event came from the OTHER user
-      // We can detect this by checking if the change was made locally (store a flag)
       notifyFromSyncEvent(event);
     });
 
