@@ -480,9 +480,9 @@ export default function Home() {
         margin: '0 auto'
       }}
     >
-      {/* Background Texture - stays behind content */}
+      {/* Background Texture - z-0, stays behind all content */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-20 z-0"
+        className="absolute inset-0 pointer-events-none opacity-50 z-0"
         style={{
           backgroundImage: `url(${grainTexture})`,
           backgroundRepeat: 'repeat',
@@ -491,7 +491,7 @@ export default function Home() {
       />
 
       {/* Header */}
-      <header className="bg-transparent pt-8 pb-4 px-6 relative">
+      <header className="bg-transparent pt-8 pb-4 px-6 relative z-10">
         {/* Decorative illustration */}
         <div className="absolute top-2 left-0 right-0 w-full h-[100px] flex items-center justify-center pointer-events-none">
           <img
@@ -511,7 +511,7 @@ export default function Home() {
 
       {/* List Content */}
       <main
-        className="flex-1 pb-24"
+        className="flex-1 pb-24 relative z-10"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

@@ -389,7 +389,7 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser }
                   {contentType !== 'text' && (
                     <button
                       onClick={handleDownload}
-                      className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity flex items-center justify-center"
+                      className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity flex items-center justify-center"
                       style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                     >
                       <Download className="w-5 h-5" />
@@ -400,7 +400,7 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser }
                   {contentType === 'text' && (
                     <button
                       onClick={handleCopy}
-                      className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity flex items-center justify-center"
+                      className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity flex items-center justify-center"
                       style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                     >
                       <Copy className="w-5 h-5" />
@@ -413,7 +413,7 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser }
                       setShowExpandedContent(false);
                       setShowDeleteConfirmation(true);
                     }}
-                    className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity flex items-center justify-center gap-2"
+                    className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity flex items-center justify-center gap-2"
                     style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                   >
                     <Trash2 className="w-4 h-4" />
