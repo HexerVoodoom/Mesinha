@@ -11,3 +11,21 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Fix GPU compositing / backface visibility transparency on list items and images */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Ensure list item cards are always fully opaque */
+[data-slot="card"] {
+  opacity: 1 !important;
+  isolation: isolate;
+}

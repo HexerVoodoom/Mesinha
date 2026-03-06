@@ -474,24 +474,19 @@ export default function Home() {
 
   return (
     <div
-      className="min-h-screen bg-background flex flex-col font-['Quicksand',sans-serif] relative"
+      className="min-h-screen flex flex-col font-['Quicksand',sans-serif] relative"
       style={{
         maxWidth: 390,
-        margin: '0 auto'
+        margin: '0 auto',
+        backgroundColor: '#FEFDFB',
+        backgroundImage: `url(${grainTexture})`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: 'auto',
       }}
     >
-      {/* Background Texture - z-0, stays behind all content */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-50 z-0"
-        style={{
-          backgroundImage: `url(${grainTexture})`,
-          backgroundRepeat: 'repeat',
-          backgroundSize: 'auto'
-        }}
-      />
 
       {/* Header */}
-      <header className="bg-transparent pt-8 pb-4 px-6 relative z-10">
+      <header className="bg-transparent pt-8 pb-4 px-6 relative">
         {/* Decorative illustration */}
         <div className="absolute top-2 left-0 right-0 w-full h-[100px] flex items-center justify-center pointer-events-none">
           <img
