@@ -4,9 +4,6 @@ import { router } from './routes';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import { LoadingScreen } from './components/LoadingScreen';
-import { subscribeToSync } from './utils/realtimeChannel';
-import { initFirebaseMessaging, onForegroundMessage } from './utils/firebase';
-import { api } from './utils/api';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -18,7 +15,7 @@ export default function App() {
     // Verificar se já existe um perfil salvo no localStorage
     const initializeApp = async () => {
       console.log('[App] Initializing app...');
-
+      
       const profile = localStorage.getItem('userProfile') as 'Amanda' | 'Mateus' | null;
       console.log('[App] Stored profile:', profile);
 
@@ -29,36 +26,12 @@ export default function App() {
       } else {
         console.log('[App] No valid profile found');
       }
-
+      
       setIsLoading(false);
     };
 
     initializeApp();
   }, []);
-
-  // When authenticated, request Firebase notification permission and grab token
-  useEffect(() => {
-    if (!isAuthenticated || !userProfile) return;
-
-    // Ask for Firebase Notification permission and get token
-    initFirebaseMessaging().then(token => {
-      if (token) {
-        api.saveFCMToken(userProfile, token);
-      }
-    });
-
-    // Start listening for foreground messages (Firebase)
-    onForegroundMessage();
-
-    // Subscribe to realtime sync
-    const unsubscribe = subscribeToSync((event) => {
-      console.log("Realtime sync event:", event);
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [isAuthenticated, userProfile]);
 
   const handleLoginSuccess = (profile: 'Amanda' | 'Mateus') => {
     console.log('[App] Login success callback:', { profile });

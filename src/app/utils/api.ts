@@ -73,20 +73,20 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
 
     if (!response.ok) {
       const contentType = response.headers.get('content-type');
-
+      
       if (contentType && contentType.includes('text/html')) {
         console.error(`Server returned HTML error page for ${endpoint}`);
         throw new Error('Servidor temporariamente indisponível. Usando modo offline.');
       }
-
+      
       const error = await response.json().catch(() => ({ error: 'Unknown error' }));
       console.error(`API Error for ${endpoint}:`, error);
-
+      
       throw new Error(error.error || 'API request failed');
     }
 
     const clone = response.clone();
-
+    
     try {
       const data = await response.json();
       console.log(`[API] Success: ${endpoint}`, { size: JSON.stringify(data).length });
@@ -99,14 +99,14 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
     }
   } catch (error) {
     clearTimeout(timeoutId);
-
+    
     // Enhanced error logging
     console.error(`[API] Error on ${endpoint}:`, {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
-
+    
     // Retry logic for connection errors
     if (retries > 0 && (
       (error instanceof Error && error.name === 'AbortError') ||
@@ -117,12 +117,12 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
       await new Promise(resolve => setTimeout(resolve, 1000));
       return fetchAPI(endpoint, options, retries - 1);
     }
-
+    
     if (error instanceof Error && error.name === 'AbortError') {
       console.error(`Request timeout for ${endpoint}`);
       throw new Error('Tempo limite excedido. Usando modo offline.');
     }
-
+    
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       console.error(`Network error: Cannot reach server at ${BASE_URL}${endpoint}`);
       throw new Error('Não foi possível conectar ao servidor. Usando modo offline.');
@@ -151,7 +151,7 @@ export const api = {
       // Use timeout menor para fotos (10s) e permite 1 retry
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
+      
       const response = await fetch(`${BASE_URL}/items/${id}/photo`, {
         headers: {
           'Content-Type': 'application/json',
@@ -159,13 +159,13 @@ export const api = {
         },
         signal: controller.signal,
       });
-
+      
       clearTimeout(timeoutId);
-
+      
       if (!response.ok) {
         return null;
       }
-
+      
       const data = await response.json();
       return data.photo;
     } catch (error) {
@@ -208,12 +208,5 @@ export const api = {
       body: JSON.stringify(settings),
     });
     return data.settings;
-  },
-
-  saveFCMToken: async (profile: string, token: string): Promise<void> => {
-    await fetchAPI('/settings/fcm-token', {
-      method: 'POST',
-      body: JSON.stringify({ profile, token }),
-    });
   },
 };
