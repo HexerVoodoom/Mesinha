@@ -626,41 +626,70 @@ export default function Home() {
         ) : (
           <div className="px-6">
             {/* Pending Items */}
-            <div className={activeCategory === 'mural' ? 'grid grid-cols-2 gap-4' : 'space-y-2'}>
-              {pendingItems.map(item => (
-                activeCategory === 'top3' ? (
-                  <Top3ItemComponent
-                    key={item.id}
-                    item={item}
-                    onUpdate={(updatedItem) => handleUpdateItem(item.id, updatedItem)}
-                    onDelete={() => handleDeleteItem(item.id)}
-                  />
-                ) : activeCategory === 'mural' ? (
-                  <MuralItemComponent
-                    key={item.id}
-                    item={item}
-                    onDelete={() => handleDeleteItem(item.id)}
-                    currentUser={userProfile}
-                    onMarkViewed={() => handleMarkViewed(item.id)}
-                  />
-                ) : (
-                  <ListItemComponent
-                    key={item.id}
-                    item={item}
-                    isExpanded={expandedItemId === item.id}
-                    onToggleExpand={() => setExpandedItemId(
-                      expandedItemId === item.id ? null : item.id
-                    )}
-                    onUpdate={(updates) => handleUpdateItem(item.id, updates)}
-                    onDelete={() => handleDeleteItem(item.id)}
-                    onMarkAsDone={() => handleMarkAsDone(item.id)}
-                    allItems={items}
-                  />
-                )
-              ))}
-              
-              {pendingItems.length === 0 && doneItems.length === 0 && (
+            <div className={activeCategory === 'mural' ? '' : 'space-y-2'}>
+              {activeCategory === 'mural' ? (
+                <>
+                  {pendingItems.length === 0 ? (
+                    <EmptyState category={activeCategory} />
+                  ) : (
+                    <>
+                      {/* Primeiro item do mural - largura total */}
+                      <div className="mb-4">
+                        <MuralItemComponent
+                          key={pendingItems[0].id}
+                          item={pendingItems[0]}
+                          onDelete={() => handleDeleteItem(pendingItems[0].id)}
+                          currentUser={userProfile}
+                          onMarkViewed={() => handleMarkViewed(pendingItems[0].id)}
+                          isHeroItem={true}
+                        />
+                      </div>
+                      
+                      {/* Demais itens em grid 2 colunas */}
+                      {pendingItems.length > 1 && (
+                        <div className="grid grid-cols-2 gap-4">
+                          {pendingItems.slice(1).map(item => (
+                            <MuralItemComponent
+                              key={item.id}
+                              item={item}
+                              onDelete={() => handleDeleteItem(item.id)}
+                              currentUser={userProfile}
+                              onMarkViewed={() => handleMarkViewed(item.id)}
+                              isHeroItem={false}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              ) : pendingItems.length === 0 ? (
                 <EmptyState category={activeCategory} />
+              ) : (
+                pendingItems.map(item => (
+                  activeCategory === 'top3' ? (
+                    <Top3ItemComponent
+                      key={item.id}
+                      item={item}
+                      onUpdate={(updatedItem) => handleUpdateItem(item.id, updatedItem)}
+                      onDelete={() => handleDeleteItem(item.id)}
+                    />
+                  ) : (
+                    <ListItemComponent
+                      key={item.id}
+                      item={item}
+                      isExpanded={expandedItemId === item.id}
+                      onToggleExpand={() => setExpandedItemId(
+                        expandedItemId === item.id ? null : item.id
+                      )}
+                      onUpdate={(updates) => handleUpdateItem(item.id, updates)}
+                      onDelete={() => handleDeleteItem(item.id)}
+                      onMarkAsDone={() => handleMarkAsDone(item.id)}
+                      onMarkAsPending={() => handleMarkAsPending(item.id)}
+                      allItems={items}
+                    />
+                  )
+                ))
               )}
             </div>
 

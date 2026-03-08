@@ -484,6 +484,25 @@ export function ListItemComponent({
                         className="text-sm"
                       />
 
+                      {/* Video Link Button - apenas para categoria watch */}
+                      {item.category === 'watch' && item.videoLink && (
+                        <a
+                          href={item.videoLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#81D8D0] to-[#4D989B] text-white rounded-xl hover:opacity-90 transition-opacity font-medium text-sm shadow-md"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>Ir para o vídeo</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      )}
+
                       {/* Photo Upload */}
                       <div>
                         <div className="relative">

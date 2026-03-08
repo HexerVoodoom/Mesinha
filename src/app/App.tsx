@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import { LoadingScreen } from './components/LoadingScreen';
 import { subscribeToSync } from './utils/realtimeChannel';
-import { projectId, publicAnonKey } from '/utils/supabase/info';
 import { initFirebaseMessaging, onForegroundMessage } from './utils/firebase';
 import { api } from './utils/api';
 
@@ -44,7 +43,6 @@ export default function App() {
     // Ask for Firebase Notification permission and get token
     initFirebaseMessaging().then(token => {
       if (token) {
-        // Save token to Supabase through your API
         api.saveFCMToken(userProfile, token);
       }
     });

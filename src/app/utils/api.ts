@@ -17,6 +17,8 @@ export interface ListItem {
   status: 'pending' | 'done';
   updatedAt?: string;
   tags?: string[];
+  // Campo para vídeos curtos (categoria watch)
+  videoLink?: string; // Link do vídeo (YouTube, TikTok, etc.)
   // Campos específicos para lembretes (categoria alarm)
   reminderTime?: string; // Horário do lembrete (formato HH:mm)
   reminderDays?: string[]; // Dias da semana ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
@@ -209,16 +211,10 @@ export const api = {
     return data.settings;
   },
 
-  // FCM Token
-  saveFCMToken: async (profile: 'Amanda' | 'Mateus', token: string): Promise<void> => {
-    try {
-      await fetchAPI('/settings/fcm-token', {
-        method: 'POST',
-        body: JSON.stringify({ profile, token }),
-      });
-      console.log('[API] FCM Token salvo com sucesso');
-    } catch (error) {
-      console.error('[API] Falha ao salvar FCM Token', error);
-    }
+  saveFCMToken: async (profile: string, token: string): Promise<void> => {
+    await fetchAPI('/settings/fcm-token', {
+      method: 'POST',
+      body: JSON.stringify({ profile, token }),
+    });
   },
 };
