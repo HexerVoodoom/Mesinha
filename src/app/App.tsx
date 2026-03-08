@@ -4,9 +4,10 @@ import { router } from './routes';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import { LoadingScreen } from './components/LoadingScreen';
-import { requestNotificationPermission, notifyFromSyncEvent, sendUserConfigToSW } from './utils/NotificationService';
 import { subscribeToSync } from './utils/realtimeChannel';
 import { projectId, publicAnonKey } from '/utils/supabase/info';
+import { initFirebaseMessaging, onForegroundMessage } from './utils/firebase';
+import { api } from './utils/api';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,22 +37,24 @@ export default function App() {
     initializeApp();
   }, []);
 
-  // When authenticated, request notification permission and subscribe to realtime sync
+  // When authenticated, request Firebase notification permission and grab token
   useEffect(() => {
     if (!isAuthenticated || !userProfile) return;
 
-    // Ask for notification permission
-    requestNotificationPermission().then(permission => {
-      if (permission === 'granted') {
-        // Send user config to Service Worker for scheduled alarm checking
-        const baseUrl = `https://${projectId}.supabase.co/functions/v1/make-server-19717bce`;
-        sendUserConfigToSW(userProfile, baseUrl, publicAnonKey);
+    // Ask for Firebase Notification permission and get token
+    initFirebaseMessaging().then(token => {
+      if (token) {
+        // Save token to Supabase through your API
+        api.saveFCMToken(userProfile, token);
       }
     });
 
-    // Subscribe to realtime sync and fire notifications on remote changes
+    // Start listening for foreground messages (Firebase)
+    onForegroundMessage();
+
+    // Subscribe to realtime sync
     const unsubscribe = subscribeToSync((event) => {
-      notifyFromSyncEvent(event);
+      console.log("Realtime sync event:", event);
     });
 
     return () => {
