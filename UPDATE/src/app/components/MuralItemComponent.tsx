@@ -13,9 +13,10 @@ interface MuralItemComponentProps {
   onDelete: () => void;
   onMarkViewed?: () => void;
   currentUser: string;
+  isHeroItem?: boolean;
 }
 
-export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser }: MuralItemComponentProps) {
+export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, isHeroItem = false }: MuralItemComponentProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showExpandedContent, setShowExpandedContent] = useState(false);
 
@@ -221,10 +222,10 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser }
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative bg-white p-3 pb-4 rounded-lg shadow-lg"
+        className={`relative bg-white ${isHeroItem ? 'p-4 pb-6' : 'p-3 pb-4'} rounded-lg shadow-lg`}
         style={{
           boxShadow: '0 4px 8px rgba(0,0,0,0.1), 0 6px 20px rgba(0,0,0,0.08)',
-          transform: `rotate(${Math.random() * 4 - 2}deg)`,
+          transform: isHeroItem ? 'rotate(0deg)' : `rotate(${Math.random() * 4 - 2}deg)`,
         }}
       >
         {/* Fita adesiva no topo */}

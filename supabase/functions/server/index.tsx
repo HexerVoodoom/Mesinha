@@ -2,6 +2,7 @@ import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import * as kv from "./kv_store.tsx";
+import { sendPushNotification } from "./firebase-admin.ts";
 
 const app = new Hono();
 
@@ -30,9 +31,9 @@ app.use('*', logger(console.log));
 // Global error handler
 app.onError((err, c) => {
   console.error("Global error handler:", err);
-  return c.json({ 
-    error: "Internal server error", 
-    message: err.message 
+  return c.json({
+    error: "Internal server error",
+    message: err.message
   }, 500);
 });
 
@@ -65,16 +66,16 @@ app.post("/make-server-19717bce/login", async (c) => {
     }
 
     console.log(`[POST /login] Login bem-sucedido para ${profile}`);
-    
-    return c.json({ 
+
+    return c.json({
       success: true,
       profile: profile
     });
   } catch (error) {
     console.error("[POST /login] Login error:", error);
-    return c.json({ 
-      error: "Erro ao fazer login", 
-      details: error instanceof Error ? error.message : String(error) 
+    return c.json({
+      error: "Erro ao fazer login",
+      details: error instanceof Error ? error.message : String(error)
     }, 500);
   }
 });
@@ -85,31 +86,31 @@ app.get("/make-server-19717bce/items", async (c) => {
     console.log('[GET /items] Fetching all items...');
     const items = await kv.getByPrefix("item:");
     console.log("[GET /items] Items fetched:", items?.length || 0);
-    
+
     // Return items with proper structure
     const validItems = (items || []).filter(item => item && item.id);
-    
+
     // CRITICAL: Remove photos from response to reduce payload size
     // Photos will be loaded separately on-demand
     const itemsWithoutPhotos = validItems.map(item => ({
       ...item,
       photo: item.photo ? 'HAS_PHOTO' : null, // Flag indicates photo exists
     }));
-    
+
     // Limit to 500 items to prevent large responses
     const limitedItems = itemsWithoutPhotos.slice(0, 500);
-    
+
     if (validItems.length > 500) {
       console.warn(`Items truncated from ${validItems.length} to 500`);
     }
-    
+
     // Calculate response size
     const jsonString = JSON.stringify({ items: limitedItems });
     const sizeInKB = jsonString.length / 1024;
     console.log(`Response size: ${sizeInKB.toFixed(2)}KB`);
-    
+
     // Return with explicit headers
-    return c.json({ 
+    return c.json({
       items: limitedItems,
       total: validItems.length,
       truncated: validItems.length > 500
@@ -118,9 +119,9 @@ app.get("/make-server-19717bce/items", async (c) => {
     });
   } catch (error) {
     console.error("Error fetching items:", error);
-    return c.json({ 
-      error: "Failed to fetch items", 
-      details: error instanceof Error ? error.message : String(error) 
+    return c.json({
+      error: "Failed to fetch items",
+      details: error instanceof Error ? error.message : String(error)
     }, 500);
   }
 });
@@ -130,17 +131,17 @@ app.get("/make-server-19717bce/items/:id/photo", async (c) => {
   try {
     const itemId = c.req.param("id");
     const item = await kv.get(`item:${itemId}`);
-    
+
     if (!item) {
       return c.json({ error: "Item not found" }, 404);
     }
-    
+
     return c.json({ photo: item.photo || null });
   } catch (error) {
     console.error("Error fetching photo:", error);
-    return c.json({ 
-      error: "Failed to fetch photo", 
-      details: error instanceof Error ? error.message : String(error) 
+    return c.json({
+      error: "Failed to fetch photo",
+      details: error instanceof Error ? error.message : String(error)
     }, 500);
   }
 });
@@ -150,7 +151,7 @@ app.post("/make-server-19717bce/items", async (c) => {
   try {
     const body = await c.req.json();
     const { title, comment, category, eventDate, photo, reminderEnabled, reminderFrequency, repeatCount, tags, createdBy } = body;
-    
+
     console.log('[POST /items] Creating item with body:', {
       category,
       title,
@@ -159,7 +160,7 @@ app.post("/make-server-19717bce/items", async (c) => {
       top3Mateus: body.top3Mateus,
       top3Amanda: body.top3Amanda,
     });
-    
+
     if (!title || !category) {
       return c.json({ error: "Title and category are required" }, 400);
     }
@@ -201,12 +202,43 @@ app.post("/make-server-19717bce/items", async (c) => {
 
     await kv.set(`item:${itemId}`, item);
     console.log("Item created successfully:", itemId);
+
+    // [NEW CODE] Disparar push notification
+    try {
+      if (category === 'mural' || category === 'MURAL' || category === 'Mural') {
+        const otherProfile = createdBy === 'Amanda' ? 'Mateus' : (createdBy === 'Mateus' ? 'Amanda' : null);
+        if (otherProfile) {
+          const token = await kv.get(`fcm_token:${otherProfile}`);
+          if (token) {
+            const pushTitle = "Novo no Mural!";
+            const contentType = body.muralContentType || 'text';
+            const typeEmoji: Record<string, string> = {
+              text: '📝',
+              image: '🖼️',
+              video: '🎥',
+              audio: '🎵',
+            };
+            const emoji = typeEmoji[contentType] || '📝';
+
+            const pushBody = `${createdBy} adicionou: ${emoji} ${title || 'Novo post'}`;
+            // Base URL do app (Github pages)
+            const link = "https://hexervoodoom.github.io/Mesinha/";
+
+            // Fire and forget
+            sendPushNotification(String(token), pushTitle, pushBody, link);
+          }
+        }
+      }
+    } catch (pushErr) {
+      console.error("Failed to trigger push notification:", pushErr);
+    }
+
     return c.json({ item });
   } catch (error) {
     console.error("Error creating item:", error);
-    return c.json({ 
-      error: "Failed to create item", 
-      details: error instanceof Error ? error.message : String(error) 
+    return c.json({
+      error: "Failed to create item",
+      details: error instanceof Error ? error.message : String(error)
     }, 500);
   }
 });
@@ -216,14 +248,14 @@ app.put("/make-server-19717bce/items/:id", async (c) => {
   try {
     const itemId = c.req.param("id");
     const body = await c.req.json();
-    
+
     console.log('[PUT /items/:id] Updating item:', itemId, {
       hasTop3Mateus: !!body.top3Mateus,
       hasTop3Amanda: !!body.top3Amanda,
       top3Mateus: body.top3Mateus,
       top3Amanda: body.top3Amanda,
     });
-    
+
     const existingItem = await kv.get(`item:${itemId}`);
     if (!existingItem) {
       return c.json({ error: "Item not found" }, 404);
@@ -249,9 +281,9 @@ app.put("/make-server-19717bce/items/:id", async (c) => {
     return c.json({ item: updatedItem });
   } catch (error) {
     console.error("Error updating item:", error);
-    return c.json({ 
-      error: "Failed to update item", 
-      details: error instanceof Error ? error.message : String(error) 
+    return c.json({
+      error: "Failed to update item",
+      details: error instanceof Error ? error.message : String(error)
     }, 500);
   }
 });
@@ -292,6 +324,25 @@ app.put("/make-server-19717bce/settings", async (c) => {
   } catch (error) {
     console.log("Error updating settings:", error);
     return c.json({ error: "Failed to update settings", details: String(error) }, 500);
+  }
+});
+
+// Save FCM Token
+app.post("/make-server-19717bce/settings/fcm-token", async (c) => {
+  try {
+    const body = await c.req.json();
+    const { profile, token } = body;
+
+    if (!profile || !token) {
+      return c.json({ error: "Profile and token are required" }, 400);
+    }
+
+    await kv.set(`fcm_token:${profile}`, token);
+    console.log(`[FCM] Token salvo para ${profile}`);
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Error saving FCM token:", error);
+    return c.json({ error: "Failed to save token" }, 500);
   }
 });
 

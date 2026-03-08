@@ -1,5 +1,7 @@
 /// <reference lib="webworker" />
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
+import { initializeApp } from "firebase/app";
+import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -135,6 +137,35 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
     event.waitUntil(self.clients.claim());
     startAlarmScheduler();
+});
+
+// ────────────────────────────────────────────────────────
+// FIREBASE FCM BACKGROUND LISTENER
+// ────────────────────────────────────────────────────────
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDHStR6pb17U_005yraz-GC0nFL3sha6Yg",
+    authDomain: "mesinha-8890e.firebaseapp.com",
+    projectId: "mesinha-8890e",
+    storageBucket: "mesinha-8890e.firebasestorage.app",
+    messagingSenderId: "155231442025",
+    appId: "1:155231442025:web:c093e0e834916a84573ef8"
+};
+
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
+onBackgroundMessage(messaging, (payload) => {
+    console.log('[sw.ts] Recebeu notificação push em background:', payload);
+    const notificationTitle = payload.notification?.title || 'Mesinha';
+    const notificationOptions = {
+        body: payload.notification?.body,
+        icon: '/pwa-192x192.png',
+        badge: '/pwa-192x192.png',
+        data: { url: '/' }
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // Quando o usuário clica na notificação, abrir o app

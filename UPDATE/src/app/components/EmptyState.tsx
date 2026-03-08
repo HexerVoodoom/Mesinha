@@ -14,6 +14,7 @@ const categoryEmojis: Record<string, string> = {
   jokes: '😄',
   alarm: '⏰',
   top3: '🏆',
+  mural: '💌',
   other: '☂️',
 };
 
@@ -27,6 +28,7 @@ const categoryMessages: Record<string, string> = {
   jokes: 'Guardem suas bobeiras internas',
   alarm: 'Configure lembretes compartilhados',
   top3: 'Criem suas listas de Top 3 favoritos',
+  mural: 'Compartilhem momentos especiais',
   other: 'Adicione outros itens importantes',
 };
 

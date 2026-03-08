@@ -23,6 +23,9 @@ export function TagSelector({ isOpen, onClose, selectedTags, onSaveTags, allItem
   // Calcular contagem de tags de todos os itens
   const getTagCounts = () => {
     const counts: Record<string, number> = {};
+    if (!allItems || !Array.isArray(allItems)) {
+      return counts;
+    }
     allItems.forEach(item => {
       if (item.tags && Array.isArray(item.tags)) {
         item.tags.forEach((tag: string) => {

@@ -16,7 +16,7 @@ export default defineConfig({
       injectManifest: {
         swDest: 'dist/sw.js',
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'firebase-messaging-sw.js'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: "Mesinha",
         short_name: "Mesinha",

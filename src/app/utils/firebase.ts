@@ -21,7 +21,8 @@ export const initFirebaseMessaging = async (): Promise<string | null> => {
 
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            const currentToken = await getToken(messaging, { vapidKey });
+            const registration = await navigator.serviceWorker.ready;
+            const currentToken = await getToken(messaging, { vapidKey, serviceWorkerRegistration: registration });
             if (currentToken) {
                 console.log('[FCM] Token gerado:', currentToken);
                 return currentToken;

@@ -24,6 +24,7 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
   const [photoUrl, setPhotoUrl] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [showTagSelector, setShowTagSelector] = useState(false);
+  const [videoLink, setVideoLink] = useState(''); // Link do vídeo para categoria watch
   
   // Top 3 fields
   const [top3MateusPos1, setTop3MateusPos1] = useState('');
@@ -123,6 +124,7 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
       photo: photoUrl || null,
       tags: tags.length > 0 ? tags : undefined,
       createdBy: 'Você',
+      videoLink: category === 'watch' && videoLink ? videoLink : undefined,
     };
     
     // Se for categoria alarm, adicionar campos específicos de lembrete
@@ -158,6 +160,7 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
     setReminderFrequency('yearly');
     setPhotoUrl('');
     setTags([]);
+    setVideoLink('');
     setTop3MateusPos1('');
     setTop3MateusPos2('');
     setTop3MateusPos3('');
@@ -233,6 +236,23 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
                     className="w-full px-4 py-3 rounded-xl border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                     rows={3}
                   />
+                </div>
+              )}
+
+              {/* Video Link (apenas para categoria watch) */}
+              {category === 'watch' && (
+                <div className="mb-4">
+                  <label className="text-base font-medium mb-2 block">Link do Vídeo</label>
+                  <input
+                    type="url"
+                    value={videoLink}
+                    onChange={(e) => setVideoLink(e.target.value)}
+                    placeholder="https://youtube.com/... ou https://tiktok.com/..."
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Cole o link do YouTube, TikTok, Instagram ou outro serviço
+                  </p>
                 </div>
               )}
 
