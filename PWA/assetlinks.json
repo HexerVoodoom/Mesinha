@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "dev.workers.mateus_sprnd.mesinha.twa",
+        "sha256_cert_fingerprints": ["E0:D6:07:FC:EB:46:E5:0E:F8:9E:0B:1B:0B:ED:5C:BA:0B:1E:61:AB:58:EE:93:89:A1:DB:70:13:59:AF:75:E5"]
+      }
+    }]

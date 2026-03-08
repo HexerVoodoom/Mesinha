@@ -48,7 +48,7 @@ export interface Settings {
 
 const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2): Promise<any> => {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // Increased to 30 seconds for large responses
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -64,6 +64,9 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
       headers,
       signal: controller.signal,
       keepalive: false,
+      // Add connection: close to prevent keep-alive issues
+      mode: 'cors',
+      cache: 'no-cache',
     });
 
     clearTimeout(timeoutId);
@@ -85,7 +88,9 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
     const clone = response.clone();
     
     try {
-      return await response.json();
+      const data = await response.json();
+      console.log(`[API] Success: ${endpoint}`, { size: JSON.stringify(data).length });
+      return data;
     } catch (parseError) {
       console.error('Error parsing response:', parseError);
       const text = await clone.text();
@@ -95,10 +100,17 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
   } catch (error) {
     clearTimeout(timeoutId);
     
+    // Enhanced error logging
+    console.error(`[API] Error on ${endpoint}:`, {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+    });
+    
     // Retry logic for connection errors
     if (retries > 0 && (
       (error instanceof Error && error.name === 'AbortError') ||
-      (error instanceof TypeError && error.message.includes('fetch'))
+      (error instanceof TypeError && error.message.includes('fetch')) ||
+      (error instanceof Error && error.message.includes('connection closed'))
     )) {
       console.log(`Retrying request to ${endpoint}... (${retries} retries left)`);
       await new Promise(resolve => setTimeout(resolve, 1000));

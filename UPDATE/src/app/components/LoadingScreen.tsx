@@ -17,9 +17,14 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
     return () => clearTimeout(timer);
   }, []);
 
+  // Função para pular a intro ao clicar
+  const handleSkip = () => {
+    setStartFade(true);
+  };
+
   return (
     <motion.div
-      className="fixed inset-0 z-[100] overflow-hidden"
+      className="fixed inset-0 z-[100] overflow-hidden cursor-pointer"
       initial={{ opacity: 1 }}
       animate={{ opacity: startFade ? 0 : 1 }}
       transition={{ duration: 1, ease: "easeInOut" }}
@@ -28,6 +33,7 @@ export function LoadingScreen({ onComplete }: LoadingScreenProps) {
           onComplete();
         }
       }}
+      onClick={handleSkip}
     >
       {/* Background com GIF animado */}
       <div 

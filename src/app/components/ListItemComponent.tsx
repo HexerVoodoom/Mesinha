@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { LazyPhoto } from './LazyPhoto';
 import { Checkbox } from './ui/checkbox';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
-import { PhotoViewModal } from './PhotoViewModal';
+import { ImageModal } from './ImageModal';
 import { ConfirmationModal } from './ConfirmationModal';
 import primaryButtonBg from "figma:asset/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
 import secondaryButtonBg from "figma:asset/75c872bdf2a28b8670edf0ef3851acf422588625.png";
@@ -305,7 +305,7 @@ export function ListItemComponent({
               {/* Photo Preview - versão fechada */}
               {!isExpanded && hasPhoto && (
                 <div 
-                  className="mt-3 rounded-xl overflow-hidden cursor-pointer transition-opacity"
+                  className="mt-3 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowPhotoView(true);
@@ -356,14 +356,14 @@ export function ListItemComponent({
                             onMarkAsPending?.();
                             onToggleExpand();
                           }}
-                          className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium transition-opacity text-sm flex items-center justify-center"
+                          className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                           style={{ backgroundImage: `url(${primaryButtonBg})` }}
                         >
                           Desmarcar
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirmation(true)}
-                          className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity text-sm flex items-center justify-center"
+                          className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                           style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                         >
                           Excluir
@@ -542,14 +542,14 @@ export function ListItemComponent({
                                 handleSave();
                                 onToggleExpand();
                               }}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${primaryButtonBg})` }}
                             >
                               Salvar
                             </button>
                             <button
                               onClick={() => setShowDeleteConfirmation(true)}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                             >
                               Excluir
@@ -595,14 +595,14 @@ export function ListItemComponent({
                                   handleSave();
                                   onToggleExpand();
                                 }}
-                                className="flex-1 h-11 relative bg-contain bg-center bg-no-repeat text-white font-medium transition-opacity text-sm flex items-center justify-center"
+                                className="flex-1 h-11 relative bg-contain bg-center bg-no-repeat text-white font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                                 style={{ backgroundImage: `url(${primaryButtonBg})` }}
                               >
                                 Salvar
                               </button>
                               <button
                                 onClick={() => setShowDeleteConfirmation(true)}
-                                className="flex-1 h-11 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity text-sm flex items-center justify-center"
+                                className="flex-1 h-11 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                                 style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                               >
                                 Excluir
@@ -617,14 +617,14 @@ export function ListItemComponent({
                                 handleSave();
                                 onToggleExpand();
                               }}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${primaryButtonBg})` }}
                             >
                               Salvar
                             </button>
                             <button
                               onClick={() => setShowDeleteConfirmation(true)}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                             >
                               Excluir
@@ -638,14 +638,14 @@ export function ListItemComponent({
                                 handleSave();
                                 onToggleExpand();
                               }}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${primaryButtonBg})` }}
                             >
                               Salvar
                             </button>
                             <button
                               onClick={() => setShowDeleteConfirmation(true)}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                             >
                               Excluir
@@ -660,14 +660,14 @@ export function ListItemComponent({
                                 onMarkAsDone();
                                 onToggleExpand();
                               }}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-white font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${primaryButtonBg})` }}
                             >
                               Salvar
                             </button>
                             <button
                               onClick={() => setShowDeleteConfirmation(true)}
-                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium transition-opacity text-sm flex items-center justify-center"
+                              className="flex-1 h-12 relative bg-contain bg-center bg-no-repeat text-foreground font-medium hover:opacity-80 transition-opacity text-sm flex items-center justify-center"
                               style={{ backgroundImage: `url(${secondaryButtonBg})` }}
                             >
                               Excluir
@@ -721,11 +721,13 @@ export function ListItemComponent({
       />
 
       {/* Photo View Modal */}
-      <PhotoViewModal
+      <ImageModal
         isOpen={showPhotoView}
         onClose={() => setShowPhotoView(false)}
         photoUrl={tempPhoto || ''}
         title={item.title}
+        createdBy={item.createdBy}
+        createdAt={item.createdAt}
       />
 
       {/* Remove Photo Confirmation Modal */}

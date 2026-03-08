@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with soft gradient -->
+  <defs>
+    <clipPath id="roundedCorner">
+      <rect width="512" height="512" rx="80" />
+    </clipPath>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#81D8D0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4D989B;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bgGradient)" clip-path="url(#roundedCorner)"/>
+  
+  <!-- Image container -->
+  <image 
+    href="figma:asset/9eee8114a75bad81040c57aa669f5b269428977b.png" 
+    x="56" 
+    y="56" 
+    width="400" 
+    height="400"
+    preserveAspectRatio="xMidYMid meet"
+    clip-path="url(#roundedCorner)"
+  />
+  
+  <!-- Subtle overlay for better icon appearance -->
+  <rect width="512" height="512" fill="#81D8D0" opacity="0.05" clip-path="url(#roundedCorner)"/>
+</svg>

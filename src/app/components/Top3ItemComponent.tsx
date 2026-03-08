@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ListItem } from '../utils/api';
 import { toast } from 'sonner';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
-import { PhotoViewModal } from './PhotoViewModal';
+import { ImageModal } from './ImageModal';
 import { ConfirmationModal } from './ConfirmationModal';
 import primaryButtonBg from "figma:asset/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
 import secondaryButtonBg from "figma:asset/75c872bdf2a28b8670edf0ef3851acf422588625.png";
@@ -440,10 +440,13 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
       />
 
       {/* Photo View Modal */}
-      <PhotoViewModal
+      <ImageModal
         isOpen={showPhotoView}
         onClose={() => setShowPhotoView(false)}
         photoUrl={item.photo || ''}
+        title={item.title}
+        createdBy={item.createdBy}
+        createdAt={item.createdAt}
       />
 
       {/* Remove Photo Confirmation Modal */}

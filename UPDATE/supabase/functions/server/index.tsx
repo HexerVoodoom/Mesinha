@@ -18,7 +18,7 @@ app.use(
     origin: "*",
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    exposeHeaders: ["Content-Length"],
+    exposeHeaders: ["Content-Length", "Content-Type"],
     maxAge: 600,
     credentials: true,
   }),
@@ -27,13 +27,34 @@ app.use(
 // Enable logger
 app.use('*', logger(console.log));
 
+// Explicit OPTIONS handler for CORS preflight
+app.options("/*", (c) => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Max-Age": "600",
+    },
+  });
+});
+
 // Global error handler
 app.onError((err, c) => {
   console.error("Global error handler:", err);
-  return c.json({ 
-    error: "Internal server error", 
-    message: err.message 
-  }, 500);
+  try {
+    return c.json({ 
+      error: "Internal server error", 
+      message: err.message 
+    }, 500);
+  } catch (e) {
+    // Fallback if JSON fails
+    return new Response(JSON.stringify({ error: "Server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 });
 
 // Health check endpoint

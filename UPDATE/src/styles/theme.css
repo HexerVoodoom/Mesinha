@@ -126,6 +126,23 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Fix for antigravity opacity issue */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Fix for image opacity/rendering issues in Antigravity */
+  img {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  /* Fix for text appearing washed out */
+  p, span, div, h1, h2, h3, h4, h5, h6 {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /**

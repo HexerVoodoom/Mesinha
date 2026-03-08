@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api, ListItem } from '../utils/api';
 import { syncApi } from '../utils/syncApi';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
+import { useNotifications } from '../hooks/useNotifications';
 import { seedInitialData } from '../utils/seedData';
 import { ListItemComponent } from '../components/ListItemComponent';
 import { EmptyState } from '../components/EmptyState';
@@ -33,6 +34,7 @@ import { Top3ItemComponent } from '../components/Top3ItemComponent';
 import { MuralItemComponent } from '../components/MuralItemComponent';
 import { AddMuralModal } from '../components/AddMuralModal';
 import { SearchContent } from '../components/SearchContent';
+import { NotificationPermissionBanner } from '../components/NotificationPermissionBanner';
 import { toast } from 'sonner';
 import fabButton from "figma:asset/dd4b98f23138814cb5d5f735480190b4a56f65a0.png";
 import grainTexture from "figma:asset/870f87368b0cc75469636c24542ec183a844dabf.png";
@@ -69,7 +71,15 @@ export default function Home() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   
-  const userProfile = localStorage.getItem('userProfile') || 'You';
+  const userProfile = (localStorage.getItem('userProfile') || 'You') as 'Amanda' | 'Mateus';
+
+  // Sistema de notificações
+  const { updateReminders, notifyNewMuralItem } = useNotifications(userProfile);
+
+  // Atualizar lembretes quando os itens mudarem
+  useEffect(() => {
+    updateReminders(items);
+  }, [items]);
 
   // Realtime Sync - escuta mudanças de outros usuários
   useRealtimeSync({
@@ -80,6 +90,12 @@ export default function Home() {
         setItems(prev => {
           // Evita duplicatas
           if (prev.some(item => item.id === event.data.id)) return prev;
+          
+          // Notificar se for item do mural
+          if (event.data.category === 'mural') {
+            notifyNewMuralItem(event.data);
+          }
+          
           return [...prev, event.data];
         });
         toast.success('Nova lista adicionada! 💕');
@@ -463,6 +479,15 @@ export default function Home() {
     ? [] 
     : filteredItems.filter(item => item.status === 'done');
 
+  // Para o mural, ordenar por mais recentes primeiro (reverse chronological)
+  if (activeCategory === 'mural' && pendingItems.length > 0) {
+    pendingItems.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA; // Mais recentes primeiro
+    });
+  }
+
   const handleSwipe = (offset: number) => {
     const currentIndex = categories.findIndex(cat => cat.id === activeCategory);
     const newIndex = currentIndex + offset;
@@ -489,6 +514,9 @@ export default function Home() {
           backgroundSize: 'auto'
         }}
       />
+
+      {/* Notification Permission Banner */}
+      <NotificationPermissionBanner />
       
       {/* Header */}
       <header className="bg-transparent pt-8 pb-4 px-6 relative">
