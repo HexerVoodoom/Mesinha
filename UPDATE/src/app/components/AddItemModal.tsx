@@ -181,7 +181,7 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 z-40"
+            className="fixed inset-0 bg-black/40 z-[60]"
             style={{ maxWidth: 390, margin: '0 auto' }}
           />
 
@@ -191,7 +191,7 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={onClose}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[70] w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center"
             style={{ maxWidth: 390 }}
           >
             <X className="w-5 h-5" />
@@ -203,7 +203,7 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full bg-card rounded-t-3xl z-50 border-t-2 border-[#4D989B]/10 max-h-[85vh] overflow-hidden flex flex-col"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full bg-card rounded-t-3xl z-[70] border-t-2 border-[#4D989B]/10 max-h-[85vh] overflow-hidden flex flex-col"
             style={{ 
               maxWidth: 390,
               boxShadow: '0 -4px 20px rgba(77, 152, 155, 0.08), 0 -1px 4px rgba(77, 152, 155, 0.04)'
@@ -405,45 +405,47 @@ export function AddItemModal({ isOpen, onClose, onAdd, category, allItems }: Add
                 </>
               )}
 
-              {/* Photo Upload - disponível para todas as categorias */}
-              <div className="mb-4">
-                <label className="text-base font-medium mb-2 block flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5" />
-                  Imagem
-                </label>
-                <div className="relative">
-                  <input
-                    id="photo-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="photo-upload"
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-input-background hover:bg-muted/30 transition-colors cursor-pointer flex items-center justify-center gap-2 text-muted-foreground"
-                  >
+              {/* Photo Upload - esconder para categoria watch */}
+              {category !== 'watch' && (
+                <div className="mb-4">
+                  <label className="text-base font-medium mb-2 block flex items-center gap-2">
                     <ImageIcon className="w-5 h-5" />
-                    <span>{photoUrl ? 'Foto selecionada' : 'Incluir foto'}</span>
+                    Imagem
                   </label>
-                  {photoUrl && (
-                    <div className="mt-3 relative rounded-xl overflow-hidden">
-                      <img 
-                        src={photoUrl} 
-                        alt="Preview" 
-                        className="w-full h-48 object-cover rounded-xl"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setPhotoUrl('')}
-                        className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
-                    </div>
-                  )}
+                  <div className="relative">
+                    <input
+                      id="photo-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="photo-upload"
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-input-background hover:bg-muted/30 transition-colors cursor-pointer flex items-center justify-center gap-2 text-muted-foreground"
+                    >
+                      <ImageIcon className="w-5 h-5" />
+                      <span>{photoUrl ? 'Foto selecionada' : 'Incluir foto'}</span>
+                    </label>
+                    {photoUrl && (
+                      <div className="mt-3 relative rounded-xl overflow-hidden">
+                        <img 
+                          src={photoUrl} 
+                          alt="Preview" 
+                          className="w-full h-48 object-cover rounded-xl"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPhotoUrl('')}
+                          className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Actions - Fixed at bottom */}

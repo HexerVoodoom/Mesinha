@@ -58,17 +58,15 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
     ...options.headers as Record<string, string>,
   };
 
-  console.log(`[API] Making request to ${endpoint}`);
+  console.log(`[API] Making request to ${BASE_URL}${endpoint}`);
 
   try {
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers,
       signal: controller.signal,
-      keepalive: false,
-      // Add connection: close to prevent keep-alive issues
       mode: 'cors',
-      cache: 'no-cache',
+      credentials: 'omit',
     });
 
     clearTimeout(timeoutId);
@@ -106,6 +104,7 @@ const fetchAPI = async (endpoint: string, options: RequestInit = {}, retries = 2
     console.error(`[API] Error on ${endpoint}:`, {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     });
 
     // Retry logic for connection errors

@@ -334,6 +334,8 @@ export default function Home() {
       // Mural specific fields
       muralContentType: newItem.muralContentType,
       muralContent: newItem.muralContent,
+      // Watch specific fields
+      videoLink: newItem.videoLink,
     };
 
     try {

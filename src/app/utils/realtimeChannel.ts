@@ -23,7 +23,11 @@ function initChannel() {
   console.log('[RealtimeChannel] Initializing shared channel...');
   const supabase = getSupabaseClient();
   
-  channelInstance = supabase.channel('shared-couple-lists');
+  channelInstance = supabase.channel('shared-couple-lists', {
+    config: {
+      broadcast: { ack: false, self: false }
+    }
+  });
   
   // Configurar listener
   channelInstance
@@ -75,14 +79,16 @@ export function subscribeToSync(callback: SyncCallback): () => void {
 }
 
 // Envia um evento para todos os clientes conectados
-export function broadcastSync(event: SyncEvent): void {
+export async function broadcastSync(event: SyncEvent): Promise<void> {
   const channel = initChannel();
   
-  channel.send({
-    type: 'broadcast',
-    event: 'sync',
-    payload: event,
-  }).catch((error) => {
+  try {
+    await channel.send({
+      type: 'broadcast',
+      event: 'sync',
+      payload: event,
+    });
+  } catch (error) {
     console.error('[RealtimeChannel] Failed to broadcast:', error);
-  });
+  }
 }

@@ -32,7 +32,7 @@ export function ConfirmationModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 z-50"
+            className="fixed inset-0 bg-black/40 z-[80]"
             style={{ maxWidth: 390, margin: '0 auto' }}
           />
 
@@ -42,7 +42,7 @@ export function ConfirmationModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] bg-white rounded-2xl z-50 shadow-xl"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] bg-white rounded-2xl z-[90] shadow-xl"
             style={{ 
               maxWidth: 330,
               boxShadow: '0 10px 40px rgba(77, 152, 155, 0.15), 0 4px 12px rgba(77, 152, 155, 0.08)'

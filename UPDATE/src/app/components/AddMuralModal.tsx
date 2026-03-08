@@ -213,7 +213,7 @@ export function AddMuralModal({ isOpen, onClose, onAdd }: AddMuralModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="fixed inset-0 bg-black/40 z-40"
+            className="fixed inset-0 bg-black/40 z-[60]"
             style={{ maxWidth: 390, margin: '0 auto' }}
           />
 
@@ -223,7 +223,7 @@ export function AddMuralModal({ isOpen, onClose, onAdd }: AddMuralModalProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed inset-0 left-1/2 -translate-x-1/2 w-full bg-background z-50 flex flex-col"
+            className="fixed inset-0 left-1/2 -translate-x-1/2 w-full bg-background z-[70] flex flex-col"
             style={{ maxWidth: 390 }}
           >
             {/* Header */}

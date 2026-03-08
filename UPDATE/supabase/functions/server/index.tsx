@@ -104,18 +104,75 @@ app.post("/make-server-19717bce/login", async (c) => {
 app.get("/make-server-19717bce/items", async (c) => {
   try {
     console.log('[GET /items] Fetching all items...');
+    
+    // Add early return for health check
+    if (!kv) {
+      console.error('[GET /items] KV store not available');
+      return c.json({ error: 'Database unavailable' }, 503);
+    }
+    
     const items = await kv.getByPrefix("item:");
     console.log("[GET /items] Items fetched:", items?.length || 0);
     
-    // Return items with proper structure
-    const validItems = (items || []).filter(item => item && item.id);
+    if (!items || items.length === 0) {
+      console.log('[GET /items] No items found, returning empty array');
+      return c.json({ items: [], total: 0, truncated: false });
+    }
+    
+    // Return items with proper structure - filter out invalid items
+    const validItems = items.filter(item => {
+      if (!item) {
+        console.warn('[GET /items] Skipping null/undefined item');
+        return false;
+      }
+      if (!item.id) {
+        console.warn('[GET /items] Skipping item without id');
+        return false;
+      }
+      if (!item.category) {
+        console.warn('[GET /items] Skipping item without category:', item.id);
+        return false;
+      }
+      if (!item.title) {
+        console.warn('[GET /items] Skipping item without title:', item.id);
+        return false;
+      }
+      return true;
+    });
+    
+    console.log(`[GET /items] Valid items: ${validItems.length} out of ${items.length}`);
     
     // CRITICAL: Remove photos from response to reduce payload size
     // Photos will be loaded separately on-demand
-    const itemsWithoutPhotos = validItems.map(item => ({
-      ...item,
-      photo: item.photo ? 'HAS_PHOTO' : null, // Flag indicates photo exists
-    }));
+    const itemsWithoutPhotos = validItems.map(item => {
+      return {
+        id: item.id,
+        title: item.title,
+        comment: item.comment,
+        category: item.category,
+        eventDate: item.eventDate,
+        photo: item.photo ? 'HAS_PHOTO' : null,
+        reminderEnabled: item.reminderEnabled,
+        reminderFrequency: item.reminderFrequency,
+        repeatCount: item.repeatCount,
+        createdBy: item.createdBy,
+        createdAt: item.createdAt,
+        status: item.status,
+        tags: item.tags,
+        videoLink: item.videoLink,
+        reminderTime: item.reminderTime,
+        reminderDays: item.reminderDays,
+        reminderForMateus: item.reminderForMateus,
+        reminderForAmanda: item.reminderForAmanda,
+        reminderActive: item.reminderActive,
+        top3Mateus: item.top3Mateus,
+        top3Amanda: item.top3Amanda,
+        muralContentType: item.muralContentType,
+        muralContent: item.muralContent,
+        viewedBy: item.viewedBy,
+        updatedAt: item.updatedAt,
+      };
+    });
     
     // Limit to 500 items to prevent large responses
     const limitedItems = itemsWithoutPhotos.slice(0, 500);
@@ -125,20 +182,23 @@ app.get("/make-server-19717bce/items", async (c) => {
     }
     
     // Calculate response size
-    const jsonString = JSON.stringify({ items: limitedItems });
-    const sizeInKB = jsonString.length / 1024;
-    console.log(`Response size: ${sizeInKB.toFixed(2)}KB`);
-    
-    // Return with explicit headers
-    return c.json({ 
+    const responseData = { 
       items: limitedItems,
       total: validItems.length,
       truncated: validItems.length > 500
-    }, 200, {
+    };
+    
+    const jsonString = JSON.stringify(responseData);
+    const sizeInKB = jsonString.length / 1024;
+    console.log(`[GET /items] Response size: ${sizeInKB.toFixed(2)}KB, items: ${limitedItems.length}`);
+    
+    // Return with explicit headers
+    return c.json(responseData, 200, {
       'Content-Type': 'application/json; charset=utf-8',
     });
   } catch (error) {
-    console.error("Error fetching items:", error);
+    console.error("[GET /items] Error fetching items:", error);
+    console.error("[GET /items] Error stack:", error instanceof Error ? error.stack : 'No stack');
     return c.json({ 
       error: "Failed to fetch items", 
       details: error instanceof Error ? error.message : String(error) 
@@ -206,6 +266,8 @@ app.post("/make-server-19717bce/items", async (c) => {
       createdAt: new Date().toISOString(),
       status: "pending",
       tags: Array.isArray(tags) ? tags.slice(0, 20) : [],
+      // Campo para vídeos curtos (categoria watch)
+      videoLink: body.videoLink || undefined,
       // Campos específicos para lembretes (categoria alarm)
       reminderTime: body.reminderTime || undefined,
       reminderDays: Array.isArray(body.reminderDays) ? body.reminderDays : undefined,

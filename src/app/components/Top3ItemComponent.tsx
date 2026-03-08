@@ -245,8 +245,8 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCancel}
-              className="fixed inset-0 bg-black/40 z-40"
-              style={{ maxWidth: 390, margin: '0 auto' }}
+              className="fixed inset-0 bg-black/50 z-[60]"
+              style={{ maxWidth: '100vw', left: 0, right: 0, margin: 0 }}
             />
 
             {/* Modal */}
@@ -255,8 +255,8 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed inset-0 left-1/2 -translate-x-1/2 w-full bg-background z-50 flex flex-col"
-              style={{ maxWidth: 390 }}
+              className="fixed left-0 right-0 bg-background z-[70] flex flex-col rounded-t-3xl shadow-2xl max-h-[90vh]"
+              style={{ bottom: 0, maxWidth: 390, margin: '0 auto' }}
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-border">
