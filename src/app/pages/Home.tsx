@@ -575,7 +575,7 @@ export default function Home() {
 
       {/* List Content */}
       <main
-        className="flex-1 pb-24"
+        className="flex-1 pb-24 relative z-10"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
