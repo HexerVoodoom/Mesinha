@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Trash2, X, Download, Copy } from 'lucide-react';
+import { Trash2, X, Download, Copy, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ListItem } from '../utils/api';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { toast } from 'sonner';
-import secondaryButtonBg from "figma:asset/75c872bdf2a28b8670edf0ef3851acf422588625.png";
+import secondaryButtonBg from "../../assets/75c872bdf2a28b8670edf0ef3851acf422588625.png";
 
 interface MuralItemComponentProps {
   item: ListItem;
@@ -14,9 +14,10 @@ interface MuralItemComponentProps {
   onMarkViewed?: () => void;
   currentUser: string;
   isHeroItem?: boolean;
+  onToggleLike?: () => void;
 }
 
-export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, isHeroItem = false }: MuralItemComponentProps) {
+export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, isHeroItem = false, onToggleLike }: MuralItemComponentProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showExpandedContent, setShowExpandedContent] = useState(false);
 
@@ -26,6 +27,21 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, 
 
   // Verifica se é novo para o usuário atual
   const isNew = item.createdBy !== currentUser && !item.viewedBy?.includes(currentUser);
+
+  // Verifica se o usuário atual curtiu o post
+  const isLikedByCurrentUser = item.likedBy?.includes(currentUser) || false;
+  
+  // Só pode curtir se não foi o criador
+  const canLike = item.createdBy !== currentUser;
+
+  // Determine background color based on creator
+  const isAmanda = item.createdBy === 'Amanda';
+  const isMateus = item.createdBy === 'Mateus';
+  const cardBackgroundClass = isAmanda 
+    ? 'bg-purple-50/50' 
+    : isMateus 
+    ? 'bg-gray-50/50' 
+    : 'bg-white';
 
   const handleOpenContent = () => {
     setShowExpandedContent(true);
@@ -222,7 +238,7 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className={`relative bg-white ${isHeroItem ? 'p-4 pb-6' : 'p-3 pb-4'} rounded-lg shadow-lg`}
+        className={`relative ${cardBackgroundClass} ${isHeroItem ? 'p-4 pb-6' : 'p-3 pb-4'} rounded-lg shadow-lg`}
         style={{
           boxShadow: '0 4px 8px rgba(0,0,0,0.1), 0 6px 20px rgba(0,0,0,0.08)',
           transform: isHeroItem ? 'rotate(0deg)' : `rotate(${Math.random() * 4 - 2}deg)`,
@@ -258,14 +274,37 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, 
             </p>
           )}
           
-          {/* Metadata */}
-          <div className="flex items-center justify-between text-xs text-[#8A847D]">
-            <span className="font-medium">
-              {item.createdBy}
-            </span>
-            <span>
-              {format(parseISO(item.createdAt), "d 'de' MMM", { locale: ptBR })}
-            </span>
+          {/* Metadata and Like */}
+          <div className="flex items-center justify-between text-xs">
+            <div className="flex flex-col gap-0.5">
+              <span className="font-medium text-[#8A847D]">
+                {item.createdBy}
+              </span>
+              <span className="text-[#8A847D]">
+                {format(parseISO(item.createdAt), "d 'de' MMM", { locale: ptBR })}
+              </span>
+            </div>
+            
+            {/* Like button - só aparece se pode curtir */}
+            {canLike && onToggleLike && (
+              <motion.button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleLike();
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-1.5 rounded-full hover:bg-white/50 transition-colors"
+              >
+                <Heart 
+                  className={`w-5 h-5 transition-colors ${
+                    isLikedByCurrentUser 
+                      ? 'fill-red-500 text-red-500' 
+                      : 'text-[#8A847D]'
+                  }`}
+                />
+              </motion.button>
+            )}
           </div>
         </div>
 
@@ -358,6 +397,15 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, 
                 <div>
                   {renderExpandedContent()}
                 </div>
+
+                {/* Caption - só para posts de imagem */}
+                {contentType === 'image' && item.caption && (
+                  <div className="pt-2">
+                    <p className="text-sm text-[#2B2A28] leading-relaxed">
+                      {item.caption}
+                    </p>
+                  </div>
+                )}
 
                 {/* Metadata */}
                 <div className="space-y-2 pt-4 border-t border-[#E8E4DF]">

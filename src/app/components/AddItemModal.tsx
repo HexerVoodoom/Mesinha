@@ -4,8 +4,8 @@ import { X, Calendar, Image as ImageIcon, Tag } from 'lucide-react';
 import { ListItem } from '../utils/api';
 import { TagSelector } from './TagSelector';
 import { toast } from 'sonner';
-import primaryButtonBg from "figma:asset/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
-import secondaryButtonBg from "figma:asset/75c872bdf2a28b8670edf0ef3851acf422588625.png";
+import primaryButtonBg from "../../assets/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
+import secondaryButtonBg from "../../assets/75c872bdf2a28b8670edf0ef3851acf422588625.png";
 
 interface AddItemModalProps {
   isOpen: boolean;

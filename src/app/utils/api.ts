@@ -41,6 +41,8 @@ export interface ListItem {
   muralContentType?: 'text' | 'image' | 'video' | 'audio';
   muralContent?: string;
   viewedBy?: string[]; // Lista de usuários que visualizaram o post
+  likedBy?: string[]; // Lista de usuários que curtiram o post
+  caption?: string; // Texto/legenda para posts de imagem do mural
 }
 
 export interface Settings {

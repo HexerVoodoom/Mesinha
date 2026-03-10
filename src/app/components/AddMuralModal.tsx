@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { X, Image as ImageIcon, Video, Mic, Type } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import primaryButtonBg from "figma:asset/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
-import secondaryButtonBg from "figma:asset/75c872bdf2a28b8670edf0ef3851acf422588625.png";
+import primaryButtonBg from "../../assets/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
+import secondaryButtonBg from "../../assets/75c872bdf2a28b8670edf0ef3851acf422588625.png";
 
 interface AddMuralModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (title: string, contentType: 'text' | 'image' | 'video' | 'audio', content: string) => void;
+  onAdd: (title: string, contentType: 'text' | 'image' | 'video' | 'audio', content: string, caption?: string) => void;
 }
 
 type ContentType = 'text' | 'image' | 'video' | 'audio';
@@ -18,6 +18,7 @@ export function AddMuralModal({ isOpen, onClose, onAdd }: AddMuralModalProps) {
   const [contentType, setContentType] = useState<ContentType>('text');
   const [textContent, setTextContent] = useState('');
   const [mediaFile, setMediaFile] = useState<string>('');
+  const [caption, setCaption] = useState(''); // Caption para posts de imagem
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
 
@@ -182,12 +183,13 @@ export function AddMuralModal({ isOpen, onClose, onAdd }: AddMuralModalProps) {
 
     const content = contentType === 'text' ? textContent : mediaFile;
     
-    onAdd(title.trim(), contentType, content);
+    onAdd(title.trim(), contentType, content, caption);
     
     // Reset
     setTitle('');
     setTextContent('');
     setMediaFile('');
+    setCaption('');
     setContentType('text');
     onClose();
   };
@@ -199,6 +201,7 @@ export function AddMuralModal({ isOpen, onClose, onAdd }: AddMuralModalProps) {
     setTitle('');
     setTextContent('');
     setMediaFile('');
+    setCaption('');
     setContentType('text');
     onClose();
   };
@@ -463,6 +466,22 @@ export function AddMuralModal({ isOpen, onClose, onAdd }: AddMuralModalProps) {
                     </div>
                   )}
                 </div>
+
+                {/* Caption para posts de imagem */}
+                {contentType === 'image' && (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-[#2B2A28]">
+                      Legenda
+                    </label>
+                    <input
+                      type="text"
+                      value={caption}
+                      onChange={(e) => setCaption(e.target.value)}
+                      placeholder="Digite uma legenda..."
+                      className="w-full px-4 py-3 bg-[#F8F6F3] rounded-xl border border-[#E8E4DF] focus:border-[#81D8D0] focus:outline-none focus:ring-2 focus:ring-[#81D8D0]/20 text-sm text-[#2B2A28] placeholder:text-[#95A5A6]"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import svgPaths from "./svg-qequ5r8rj9";
-import imgDiv from "figma:asset/d35f9ee94ddbebc2679de29a725bb3a3047255e9.png";
+import imgDiv from "../assets/d35f9ee94ddbebc2679de29a725bb3a3047255e9.png";
 
 function Wrapper7({ children }: React.PropsWithChildren<{}>) {
   return (
