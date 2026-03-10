@@ -355,7 +355,7 @@ export default function Home() {
     toast.success('Item adicionado com sucesso!');
   };
 
-  const handleAddMuralPost = async (title: string, contentType: 'text' | 'image' | 'video' | 'audio', content: string) => {
+  const handleAddMuralPost = async (title: string, contentType: 'text' | 'image' | 'video' | 'audio', content: string, caption?: string) => {
     const item: ListItem = {
       id: Date.now().toString(),
       title,
@@ -370,6 +370,7 @@ export default function Home() {
       tags: [],
       muralContentType: contentType,
       muralContent: content,
+      caption: caption || undefined, // Adiciona caption se fornecido
     };
 
     try {
@@ -464,6 +465,24 @@ export default function Home() {
     }
   };
 
+  const handleToggleLike = async (id: string) => {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    
+    // Não pode curtir o próprio post
+    if (item.createdBy === userProfile) return;
+    
+    // Toggle do like
+    const likedBy = item.likedBy || [];
+    const newLikedBy = likedBy.includes(userProfile)
+      ? likedBy.filter(user => user !== userProfile) // Remove like
+      : [...likedBy, userProfile]; // Adiciona like
+    
+    await handleUpdateItem(id, { 
+      likedBy: newLikedBy 
+    });
+  };
+
   const filteredItems = items.filter(item => {
     if (item.category !== activeCategory) return false;
     // Para categoria 'dates', não filtrar por status
@@ -486,7 +505,7 @@ export default function Home() {
     pendingItems.sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
-      return dateB - dateA; // Mais recentes primeiro
+      return dateB - dateA; // Mais recentes primeiro (criados por último no topo)
     });
   }
   
@@ -497,9 +516,11 @@ export default function Home() {
       if (a.isFavorite && !b.isFavorite) return -1;
       if (!a.isFavorite && b.isFavorite) return 1;
       
-      // Se ambos são favoritos ou nenhum é favorito, manter ordem existente
-      // (para mural, isso mantém a ordenação por data; para outros, ordem de criação)
-      return 0;
+      // Se ambos são favoritos ou nenhum é favorito, ordenar por data de criação
+      // Mais recentes primeiro (criados por último no topo)
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA;
     });
   }
 
@@ -656,6 +677,7 @@ export default function Home() {
                           onDelete={() => handleDeleteItem(pendingItems[0].id)}
                           currentUser={userProfile}
                           onMarkViewed={() => handleMarkViewed(pendingItems[0].id)}
+                          onToggleLike={() => handleToggleLike(pendingItems[0].id)}
                           isHeroItem={true}
                         />
                       </div>
@@ -670,6 +692,7 @@ export default function Home() {
                               onDelete={() => handleDeleteItem(item.id)}
                               currentUser={userProfile}
                               onMarkViewed={() => handleMarkViewed(item.id)}
+                              onToggleLike={() => handleToggleLike(item.id)}
                               isHeroItem={false}
                             />
                           ))}
