@@ -489,6 +489,19 @@ export default function Home() {
       return dateB - dateA; // Mais recentes primeiro
     });
   }
+  
+  // Para todas as categorias, favoritos sempre ficam no topo
+  if (pendingItems.length > 0) {
+    pendingItems.sort((a, b) => {
+      // Favoritos primeiro
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      
+      // Se ambos são favoritos ou nenhum é favorito, manter ordem existente
+      // (para mural, isso mantém a ordenação por data; para outros, ordem de criação)
+      return 0;
+    });
+  }
 
   const handleSwipe = (offset: number) => {
     const currentIndex = categories.findIndex(cat => cat.id === activeCategory);

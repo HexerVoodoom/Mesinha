@@ -1,9 +1,8 @@
-import { motion } from 'motion/react';
-import { ChevronRight, Play, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronRight, Play, ExternalLink, AlarmClock, Star } from 'lucide-react';
 import { ListItem } from '../utils/api';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useState } from 'react';
 import { Card, CardContent } from './ui/Card';
 import { LazyPhoto } from './LazyPhoto';
 import { ItemDetailModal } from './ItemDetailModal';
@@ -69,6 +68,15 @@ export function ListItemComponent({
   const isOtherCategory = item.category === 'other';
   const isDone = item.status === 'done';
   
+  // Determine background color based on creator
+  const isAmanda = item.createdBy === 'Amanda';
+  const isMateus = item.createdBy === 'Mateus';
+  const cardBackgroundClass = isAmanda 
+    ? 'bg-purple-50/50' 
+    : isMateus 
+    ? 'bg-gray-50/50' 
+    : 'bg-white';
+  
   const frequencyLabels = {
     daily: 'Diariamente',
     weekly: 'Semanalmente',
@@ -88,7 +96,7 @@ export function ListItemComponent({
 
   return (
     <>
-      <Card variant="white" className="overflow-visible">
+      <Card variant="white" className={`overflow-visible ${cardBackgroundClass}`}>
         <CardContent className="p-[18px]">
           {/* Main Row */}
           <div className="flex items-start gap-4">
@@ -108,17 +116,26 @@ export function ListItemComponent({
                 }}
                 className="flex-shrink-0 mt-0.5"
               >
-                <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                  isAlarmCategory
-                    ? (item.reminderActive ? 'border-primary bg-primary' : 'border-[#4D989B]/30 bg-white')
-                    : (isDone ? 'border-primary bg-primary' : 'border-[#4D989B]/30 bg-white')
-                }`}>
-                  {((isAlarmCategory && item.reminderActive) || (!isAlarmCategory && isDone)) && (
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </div>
+                {isAlarmCategory ? (
+                  // Ícone de relógio para lembretes
+                  <AlarmClock 
+                    className={`w-6 h-6 transition-all ${
+                      item.reminderActive ? 'text-primary' : 'text-[#C5C0BA]'
+                    }`}
+                    strokeWidth={2}
+                  />
+                ) : (
+                  // Checkbox para outras categorias
+                  <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                    isDone ? 'border-primary bg-primary' : 'border-[#4D989B]/30 bg-white'
+                  }`}>
+                    {isDone && (
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                )}
               </button>
             )}
 
@@ -305,10 +322,22 @@ export function ListItemComponent({
               </button>
             </div>
 
-            {/* Chevron */}
-            <button onClick={() => setShowModal(true)} className="flex-shrink-0 mt-1">
-              <ChevronRight className="w-5 h-5 text-[#8A847D]/40" strokeWidth={2.5} />
-            </button>
+            {/* Favorite Star (visual indicator only) and Chevron */}
+            <div className="flex items-center gap-1 flex-shrink-0 mt-1">
+              {/* Favorite Star - Only visible when favorited */}
+              {item.isFavorite && (
+                <Star 
+                  className="w-5 h-5 text-[#FFD700] fill-[#FFD700]"
+                  strokeWidth={1.5}
+                  style={{ stroke: '#000000' }}
+                />
+              )}
+              
+              {/* Chevron */}
+              <button onClick={() => setShowModal(true)}>
+                <ChevronRight className="w-5 h-5 text-[#8A847D]/40" strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>

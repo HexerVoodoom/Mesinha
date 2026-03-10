@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { Edit2, Trash2, X, ImageIcon } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Edit2, Trash2, X, ImageIcon, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ListItem } from '../utils/api';
 import { toast } from 'sonner';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { ImageModal } from './ImageModal';
 import { ConfirmationModal } from './ConfirmationModal';
+import { LazyPhoto } from './LazyPhoto';
+import { Card, CardContent } from './ui/Card';
 import primaryButtonBg from "figma:asset/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
 import secondaryButtonBg from "figma:asset/75c872bdf2a28b8670edf0ef3851acf422588625.png";
 
@@ -21,6 +23,7 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
   const [showPhotoView, setShowPhotoView] = useState(false);
   const [showRemovePhotoConfirm, setShowRemovePhotoConfirm] = useState(false);
   const [photoUrl, setPhotoUrl] = useState(item.photo || '');
+  const [loadedPhotoForModal, setLoadedPhotoForModal] = useState<string>('');
   const [mateusValues, setMateusValues] = useState({
     position1: item.top3Mateus?.position1 || '',
     position2: item.top3Mateus?.position2 || '',
@@ -32,43 +35,70 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
     position3: item.top3Amanda?.position3 || '',
   });
 
+  // Determine background color based on creator
+  const isAmanda = item.createdBy === 'Amanda';
+  const isMateus = item.createdBy === 'Mateus';
+  const cardBackgroundClass = isAmanda 
+    ? 'bg-purple-50' 
+    : isMateus 
+    ? 'bg-gray-50' 
+    : 'bg-white';
+
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
+        const result = e.target?.result;
+        if (!result || typeof result !== 'string') {
+          reject(new Error('Failed to read file'));
+          return;
+        }
+
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const maxSize = 1200;
+          try {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxSize = 1200;
 
-          if (width > height && width > maxSize) {
-            height = (height / width) * maxSize;
-            width = maxSize;
-          } else if (height > maxSize) {
-            width = (width / height) * maxSize;
-            height = maxSize;
-          }
+            if (width > height && width > maxSize) {
+              height = (height / width) * maxSize;
+              width = maxSize;
+            } else if (height > maxSize) {
+              width = (width / height) * maxSize;
+              height = maxSize;
+            }
 
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              reject(new Error('Failed to get canvas context'));
+              return;
+            }
+            ctx.drawImage(img, 0, 0, width, height);
 
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-          
-          if (compressedDataUrl.length > 2800000) {
-            const lowerQuality = canvas.toDataURL('image/jpeg', 0.5);
-            resolve(lowerQuality);
-          } else {
-            resolve(compressedDataUrl);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            
+            if (compressedDataUrl.length > 2800000) {
+              const lowerQuality = canvas.toDataURL('image/jpeg', 0.5);
+              resolve(lowerQuality);
+            } else {
+              resolve(compressedDataUrl);
+            }
+          } catch (error) {
+            reject(error);
           }
         };
-        img.onerror = reject;
-        img.src = e.target?.result as string;
+        img.onerror = (error) => {
+          reject(new Error('Failed to load image'));
+        };
+        img.src = result;
       };
-      reader.onerror = reject;
+      reader.onerror = (error) => {
+        reject(new Error('Failed to read file'));
+      };
       reader.readAsDataURL(file);
     });
   };
@@ -140,100 +170,134 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
 
   return (
     <>
-      <div className="bg-white rounded-2xl p-5 border border-[#E8E4DF] shadow-sm">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-[#2B2A28]">{item.title}</h3>
-          <button
-            onClick={() => setIsEditing(true)}
-            className="p-2 hover:bg-[#F8F6F3] rounded-lg transition-colors"
-          >
-            <Edit2 className="w-4 h-4 text-[#2B2A28]" />
-          </button>
-        </div>
-
-        <div className="space-y-6">
-          {/* Top 3 do Mateus */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-medium text-[#2B2A28]">Top 3 do Mateus</span>
+      <Card variant="white" className={`overflow-visible ${cardBackgroundClass}`}>
+        <CardContent className="p-5">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-[#2B2A28]">{item.title}</h3>
+              {/* Favorite Star - Only visible when favorited */}
+              {item.isFavorite && (
+                <Star 
+                  className="w-5 h-5 text-[#FFD700] fill-[#FFD700]"
+                  strokeWidth={1.5}
+                  style={{ stroke: '#000000' }}
+                />
+              )}
             </div>
-            
-            <div className="space-y-2">
-              {/* Posição 2 */}
-              <div className="flex items-center gap-3">
-                <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">2</span>
-                <span className="flex-1 text-base font-medium text-[#2B2A28] opacity-100">
-                  {mateusValues.position2 || '—'}
-                </span>
-              </div>
-
-              {/* Posição 1 */}
-              <div className="flex items-center gap-3">
-                <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">1</span>
-                <span className="flex-1 text-base font-semibold text-[#2B2A28] opacity-100">
-                  {mateusValues.position1 || '—'}
-                </span>
-              </div>
-
-              {/* Posição 3 */}
-              <div className="flex items-center gap-3">
-                <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">3</span>
-                <span className="flex-1 text-base font-medium text-[#2B2A28] opacity-100">
-                  {mateusValues.position3 || '—'}
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              {/* Edit Button */}
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-2 hover:bg-[#F8F6F3] rounded-lg transition-colors"
+              >
+                <Edit2 className="w-4 h-4 text-[#2B2A28]" />
+              </button>
             </div>
           </div>
 
-          {/* Divisor */}
-          <div className="border-t border-[#E8E4DF]" />
+          <div className="space-y-6">
+            {/* Top 3 do Mateus */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-[#2B2A28]">Top 3 do Mateus</span>
+              </div>
+              
+              <div className="space-y-2">
+                {/* Posição 2 */}
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">2</span>
+                  <span className="flex-1 text-base font-medium text-[#8A847D]">
+                    {mateusValues.position2 || '—'}
+                  </span>
+                </div>
 
-          {/* Top 3 da Amanda */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-medium text-[#2B2A28]">Top 3 da Amanda</span>
+                {/* Posição 1 */}
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">1</span>
+                  <span className="flex-1 text-base font-semibold text-[#8A847D]">
+                    {mateusValues.position1 || '—'}
+                  </span>
+                </div>
+
+                {/* Posição 3 */}
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">3</span>
+                  <span className="flex-1 text-base font-medium text-[#8A847D]">
+                    {mateusValues.position3 || '—'}
+                  </span>
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              {/* Posição 2 */}
-              <div className="flex items-center gap-3">
-                <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">2</span>
-                <span className="flex-1 text-base font-medium text-[#2B2A28] opacity-100">
-                  {amandaValues.position2 || '—'}
-                </span>
-              </div>
 
-              {/* Posição 1 */}
-              <div className="flex items-center gap-3">
-                <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">1</span>
-                <span className="flex-1 text-base font-semibold text-[#2B2A28] opacity-100">
-                  {amandaValues.position1 || '—'}
-                </span>
-              </div>
+            {/* Divisor */}
+            <div className="border-t border-[#E8E4DF]" />
 
-              {/* Posição 3 */}
-              <div className="flex items-center gap-3">
-                <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">3</span>
-                <span className="flex-1 text-base font-medium text-[#2B2A28] opacity-100">
-                  {amandaValues.position3 || '—'}
-                </span>
+            {/* Top 3 da Amanda */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm font-medium text-[#2B2A28]">Top 3 da Amanda</span>
+              </div>
+              
+              <div className="space-y-2">
+                {/* Posição 2 */}
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">2</span>
+                  <span className="flex-1 text-base font-medium text-[#8A847D]">
+                    {amandaValues.position2 || '—'}
+                  </span>
+                </div>
+
+                {/* Posição 1 */}
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">1</span>
+                  <span className="flex-1 text-base font-semibold text-[#8A847D]">
+                    {amandaValues.position1 || '—'}
+                  </span>
+                </div>
+
+                {/* Posição 3 */}
+                <div className="flex items-center gap-3">
+                  <span className="text-base font-semibold text-[#2B2A28] w-4 flex-shrink-0">3</span>
+                  <span className="flex-1 text-base font-medium text-[#8A847D]">
+                    {amandaValues.position3 || '—'}
+                  </span>
+                </div>
               </div>
             </div>
+
+            {/* Photo Display */}
+            {(item.photo === 'HAS_PHOTO' || (item.photo && item.photo.startsWith('data:'))) && (
+              <div className="mt-4 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => {
+                if (loadedPhotoForModal) {
+                  setShowPhotoView(true);
+                }
+              }}>
+                {item.photo === 'HAS_PHOTO' ? (
+                  <LazyPhoto 
+                    itemId={item.id}
+                    hasPhoto={true}
+                    alt={item.title} 
+                    className="w-full h-48 object-cover rounded-xl"
+                    onLoad={(photo) => {
+                      if (photo) {
+                        setLoadedPhotoForModal(photo);
+                      }
+                    }}
+                  />
+                ) : (
+                  <img 
+                    src={item.photo || ''} 
+                    alt={item.title}
+                    className="w-full h-48 object-cover rounded-xl"
+                    onLoad={() => setLoadedPhotoForModal(item.photo || '')}
+                  />
+                )}
+              </div>
+            )}
           </div>
-
-          {/* Photo Display */}
-          {item.photo && (
-            <div className="mt-4 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setShowPhotoView(true)}>
-              <img 
-                src={item.photo} 
-                alt={item.title} 
-                className="w-full h-48 object-cover rounded-xl"
-              />
-            </div>
-          )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Edit Modal - Full Screen */}
       <AnimatePresence>
@@ -261,12 +325,33 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-border">
                 <h2 className="text-xl font-semibold text-[#2B2A28]">{item.title}</h2>
-                <button
-                  onClick={handleCancel}
-                  className="p-2 hover:bg-[#F8F6F3] rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-[#2B2A28]" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Botão de favorito */}
+                  <button
+                    onClick={() => {
+                      const updatedItem = { ...item, isFavorite: !item.isFavorite };
+                      onUpdate(updatedItem);
+                      toast.success(item.isFavorite ? 'Removido dos favoritos' : 'Adicionado aos favoritos');
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/30 transition-colors"
+                  >
+                    <Star 
+                      className={`w-5 h-5 transition-all ${
+                        item.isFavorite 
+                          ? 'text-[#FFD700] fill-[#FFD700]' 
+                          : 'text-[#8A847D]'
+                      }`}
+                      strokeWidth={1.5}
+                      style={item.isFavorite ? { stroke: '#000000' } : undefined}
+                    />
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className="p-2 hover:bg-[#F8F6F3] rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-[#2B2A28]" />
+                  </button>
+                </div>
               </div>
 
               {/* Content - Scrollable */}
@@ -443,7 +528,7 @@ export function Top3ItemComponent({ item, onUpdate, onDelete }: Top3ItemComponen
       <ImageModal
         isOpen={showPhotoView}
         onClose={() => setShowPhotoView(false)}
-        photoUrl={item.photo || ''}
+        photoUrl={loadedPhotoForModal || item.photo || ''}
         title={item.title}
         createdBy={item.createdBy}
         createdAt={item.createdAt}

@@ -27,6 +27,15 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, 
   // Verifica se é novo para o usuário atual
   const isNew = item.createdBy !== currentUser && !item.viewedBy?.includes(currentUser);
 
+  // Determine background color based on creator
+  const isAmanda = item.createdBy === 'Amanda';
+  const isMateus = item.createdBy === 'Mateus';
+  const cardBackgroundClass = isAmanda 
+    ? 'bg-purple-50/50' 
+    : isMateus 
+    ? 'bg-gray-50/50' 
+    : 'bg-white';
+
   const handleOpenContent = () => {
     setShowExpandedContent(true);
     // Marca como visualizado quando abre o conteúdo
@@ -222,7 +231,7 @@ export function MuralItemComponent({ item, onDelete, onMarkViewed, currentUser, 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className={`relative bg-white ${isHeroItem ? 'p-4 pb-6' : 'p-3 pb-4'} rounded-lg shadow-lg`}
+        className={`relative ${cardBackgroundClass} ${isHeroItem ? 'p-4 pb-6' : 'p-3 pb-4'} rounded-lg shadow-lg`}
         style={{
           boxShadow: '0 4px 8px rgba(0,0,0,0.1), 0 6px 20px rgba(0,0,0,0.08)',
           transform: isHeroItem ? 'rotate(0deg)' : `rotate(${Math.random() * 4 - 2}deg)`,

@@ -1,9 +1,9 @@
+import { useState } from 'react';
+import { X, Image as ImageIcon, Bell, BellOff, Play, ExternalLink, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Image as ImageIcon, Bell, BellOff, Play, ExternalLink } from 'lucide-react';
 import { ListItem } from '../utils/api';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useState } from 'react';
 import { TextArea } from './ui/Input';
 import { TagSelector } from './TagSelector';
 import { toast } from 'sonner';
@@ -210,12 +210,33 @@ export function ItemDetailModal({
                 <h2 className="font-['Quicksand',sans-serif] font-bold text-lg text-[#2B2A28]">
                   {item.title}
                 </h2>
-                <button
-                  onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/30 transition-colors"
-                >
-                  <X className="w-5 h-5 text-[#8A847D]" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Botão de favorito */}
+                  <button
+                    onClick={() => {
+                      onUpdate({ isFavorite: !item.isFavorite });
+                      toast.success(item.isFavorite ? 'Removido dos favoritos' : 'Adicionado aos favoritos');
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/30 transition-colors"
+                  >
+                    <Star 
+                      className={`w-5 h-5 transition-all ${
+                        item.isFavorite 
+                          ? 'text-[#FFD700] fill-[#FFD700]' 
+                          : 'text-[#8A847D]'
+                      }`}
+                      strokeWidth={1.5}
+                      style={item.isFavorite ? { stroke: '#000000' } : undefined}
+                    />
+                  </button>
+                  {/* Botão de fechar */}
+                  <button
+                    onClick={onClose}
+                    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/30 transition-colors"
+                  >
+                    <X className="w-5 h-5 text-[#8A847D]" />
+                  </button>
+                </div>
               </div>
 
               {/* Content */}

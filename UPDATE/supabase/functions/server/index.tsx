@@ -165,6 +165,7 @@ app.get("/make-server-19717bce/items", async (c) => {
         reminderForMateus: item.reminderForMateus,
         reminderForAmanda: item.reminderForAmanda,
         reminderActive: item.reminderActive,
+        isFavorite: item.isFavorite,
         top3Mateus: item.top3Mateus,
         top3Amanda: item.top3Amanda,
         muralContentType: item.muralContentType,

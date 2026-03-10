@@ -17,6 +17,7 @@ export interface ListItem {
   status: 'pending' | 'done';
   updatedAt?: string;
   tags?: string[];
+  isFavorite?: boolean; // Indica se o item é favorito
   // Campo para vídeos curtos (categoria watch)
   videoLink?: string; // Link do vídeo (YouTube, TikTok, etc.)
   // Campos específicos para lembretes (categoria alarm)
