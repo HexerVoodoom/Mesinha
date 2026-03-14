@@ -6,11 +6,11 @@
     </clipPath>
   </defs>
   
-  <rect width="32" height="32" fill="#81D8D0" clip-path="url(#roundedFavicon)"/>
+  <rect width="32" height="32" fill="#F8F6F4" clip-path="url(#roundedFavicon)"/>
   
   <!-- Image -->
   <image 
-    href="figma:asset/9eee8114a75bad81040c57aa669f5b269428977b.png" 
+    href="figma:asset/63f1c91888d5013b6ec77f78cfdc3f2164718216.png" 
     x="2" 
     y="2" 
     width="28" 

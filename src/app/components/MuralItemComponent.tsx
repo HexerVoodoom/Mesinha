@@ -6,7 +6,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { toast } from 'sonner';
-import secondaryButtonBg from "../../assets/75c872bdf2a28b8670edf0ef3851acf422588625.png";
+import secondaryButtonBg from "@/assets/75c872bdf2a28b8670edf0ef3851acf422588625.png";
 
 interface MuralItemComponentProps {
   item: ListItem;

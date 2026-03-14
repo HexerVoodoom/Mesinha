@@ -2,8 +2,8 @@
   <!-- Background with gradient -->
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#81D8D0;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#4D989B;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#FFE5E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F8F6F4;stop-opacity:1" />
     </linearGradient>
     <clipPath id="rounded">
       <rect width="512" height="512" rx="80" />
@@ -12,51 +12,14 @@
   
   <rect width="512" height="512" fill="url(#bg)" clip-path="url(#rounded)"/>
   
-  <!-- Cute couple illustration placeholder -->
-  <g clip-path="url(#rounded)">
-    <!-- Girl with orange hair -->
-    <circle cx="220" cy="200" r="60" fill="#FFB380" opacity="0.3"/>
-    <circle cx="220" cy="180" r="45" fill="#FFF5EB"/>
-    <ellipse cx="210" cy="175" rx="3" ry="5" fill="#2B2A28"/>
-    <ellipse cx="230" cy="175" rx="3" ry="5" fill="#2B2A28"/>
-    <path d="M 210 185 Q 220 190 230 185" stroke="#FFB380" stroke-width="2" fill="none" stroke-linecap="round"/>
-    
-    <!-- Boy -->
-    <circle cx="292" cy="210" r="55" fill="#A8E6CF" opacity="0.3"/>
-    <circle cx="292" cy="195" r="40" fill="#FFF5EB"/>
-    <ellipse cx="284" cy="190" rx="3" ry="5" fill="#2B2A28"/>
-    <ellipse cx="300" cy="190" rx="3" ry="5" fill="#2B2A28"/>
-    <path d="M 284 198 Q 292 202 300 198" stroke="#A8E6CF" stroke-width="2" fill="none" stroke-linecap="round"/>
-    
-    <!-- Alpaca -->
-    <ellipse cx="160" cy="280" rx="40" ry="50" fill="#FFF5EB"/>
-    <ellipse cx="145" cy="250" rx="8" ry="15" fill="#FFF5EB"/>
-    <ellipse cx="175" cy="250" rx="8" ry="15" fill="#FFF5EB"/>
-    <circle cx="155" cy="270" r="3" fill="#2B2A28"/>
-    <circle cx="165" cy="270" r="3" fill="#2B2A28"/>
-    
-    <!-- Cat -->
-    <ellipse cx="350" cy="280" rx="35" ry="40" fill="#FFFFFF"/>
-    <path d="M 325 255 L 315 235 L 330 250 Z" fill="#FFFFFF"/>
-    <path d="M 375 255 L 385 235 L 370 250 Z" fill="#FFFFFF"/>
-    <circle cx="342" cy="275" r="2" fill="#2B2A28"/>
-    <circle cx="358" cy="275" r="2" fill="#2B2A28"/>
-    
-    <!-- Hearts -->
-    <g opacity="0.8">
-      <path d="M 256 140 C 256 130 250 125 244 125 C 238 125 232 130 232 140 C 232 150 244 160 256 172 C 244 160 232 150 232 140 Z" fill="#FF6B9D"/>
-      <path d="M 256 140 C 256 130 262 125 268 125 C 274 125 280 130 280 140 C 280 150 268 160 256 172 C 268 160 280 150 280 140 Z" fill="#FF6B9D"/>
-    </g>
-    
-    <!-- Sparkles -->
-    <circle cx="400" cy="150" r="5" fill="#FFFFFF" opacity="0.7"/>
-    <circle cx="430" cy="180" r="3" fill="#FFFFFF" opacity="0.5"/>
-    <circle cx="100" cy="160" r="4" fill="#FFFFFF" opacity="0.6"/>
-    <circle cx="80" cy="190" r="3" fill="#FFFFFF" opacity="0.5"/>
-    
-    <!-- Text "Mesinha" -->
-    <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF" text-anchor="middle" opacity="0.9">
-      Mesinha
-    </text>
-  </g>
+  <!-- Image -->
+  <image 
+    href="figma:asset/63f1c91888d5013b6ec77f78cfdc3f2164718216.png" 
+    x="56" 
+    y="56" 
+    width="400" 
+    height="400"
+    preserveAspectRatio="xMidYMid meet"
+    clip-path="url(#rounded)"
+  />
 </svg>

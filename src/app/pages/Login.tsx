@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { api } from '../utils/api';
-import buttonBg from '../../assets/75c872bdf2a28b8670edf0ef3851acf422588625.png';
-import buttonImage from '../../assets/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png';
-import headerDecoration from '../../assets/1f94cbc6275b0a35eb5a9c6c93b92d94e2251075.png';
+import buttonBg from '@/assets/75c872bdf2a28b8670edf0ef3851acf422588625.png';
+import buttonImage from '@/assets/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png';
+import headerDecoration from '@/assets/1f94cbc6275b0a35eb5a9c6c93b92d94e2251075.png';
 
 interface LoginProps {
   onLoginSuccess: (profile: 'Amanda' | 'Mateus') => void;

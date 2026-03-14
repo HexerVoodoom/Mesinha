@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import {
+import { 
   Tv,
   Film,
   Gamepad2,
@@ -10,8 +10,8 @@ import {
   Smile,
   AlarmClock,
   Umbrella,
-  ChevronRight,
-  Plus,
+  ChevronRight, 
+  Plus, 
   Settings as SettingsIcon,
   ChevronDown,
   Filter,
@@ -36,9 +36,22 @@ import { AddMuralModal } from '../components/AddMuralModal';
 import { SearchContent } from '../components/SearchContent';
 import { NotificationPermissionBanner } from '../components/NotificationPermissionBanner';
 import { toast } from 'sonner';
-import fabButton from "../../assets/dd4b98f23138814cb5d5f735480190b4a56f65a0.png";
-import grainTexture from "../../assets/870f87368b0cc75469636c24542ec183a844dabf.png";
-import headerDecoration from "../../assets/1f94cbc6275b0a35eb5a9c6c93b92d94e2251075.png";
+import fabButton from "@/assets/dd4b98f23138814cb5d5f735480190b4a56f65a0.png";
+import grainTexture from "@/assets/870f87368b0cc75469636c24542ec183a844dabf.png";
+import headerDecoration from "@/assets/1f94cbc6275b0a35eb5a9c6c93b92d94e2251075.png";
+import topLaceDecoration from "@/assets/efb30badc4fa5c4da28d3bf6ea65d7d99aa6b99b.png";
+import imgIconeMural from "@/assets/f55be14c67f2ee6191fde351aa33771fce7d5b93.png";
+import imgIconLembrete from "@/assets/5097108198344c1c84390e42ebe8df3ec16868c9.png";
+import imgIconData from "@/assets/e6ae93276b700b8f8f931da6519affe6c2e9c5d0.png";
+import imgIconBobeiras from "@/assets/44df7767036d0bbe143fb9ee3102554d9c29474f.png";
+import imgIconTop3 from "@/assets/f296c57b6ed7e73b350453d968fd883591dd3581.png";
+import imgIconFilmesESeries from "@/assets/a7e6f180afcfd6cefd1ae8165ed758a29e25da14.png";
+import imgIconPesquisar from "@/assets/cb1c8fe4b905e0ba73cec7627c5b9f5168142c03.png";
+import imgIconOutros from "@/assets/9598e760cce271dc861fb90f06a336792553ef6a.png";
+import imgIconLugares from "@/assets/d4ec5ae65b7bd51ce704f9bf07164532caa53a33.png";
+import imgIconcomidas from "@/assets/2c8cffafea0b456e1dfa9a773e633226de456ac0.png";
+import imgIconVideoGame from "@/assets/783a5ddb42e8653aa6debba484cc8b75c211df92.png";
+import imgIconVieosCurtos from "@/assets/b72dc3ec57224b4caa82c0bbb8e9602e4a8602e4.png";
 
 type Category = 'watch' | 'movies' | 'games' | 'food' | 'places' | 'dates' | 'jokes' | 'alarm' | 'top3' | 'mural' | 'other';
 
@@ -56,6 +69,22 @@ const categories = [
   { id: 'other' as Category, icon: Umbrella, label: 'Outros' },
 ];
 
+// Mapeamento dos ícones personalizados do Figma
+const categoryIcons: Record<Category | 'search', string> = {
+  mural: imgIconeMural,
+  alarm: imgIconLembrete,
+  dates: imgIconData,
+  jokes: imgIconBobeiras,
+  top3: imgIconTop3,
+  movies: imgIconFilmesESeries,
+  watch: imgIconVieosCurtos,
+  games: imgIconVideoGame,
+  food: imgIconcomidas,
+  places: imgIconLugares,
+  other: imgIconOutros,
+  search: imgIconPesquisar,
+};
+
 export default function Home() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<Category>('mural');
@@ -70,7 +99,7 @@ export default function Home() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(false);
-
+  
   const userProfile = (localStorage.getItem('userProfile') || 'You') as 'Amanda' | 'Mateus';
 
   // Sistema de notificações
@@ -85,22 +114,22 @@ export default function Home() {
   useRealtimeSync({
     onSync: (event) => {
       console.log('[Home] Sync event received:', event);
-
+      
       if (event.type === 'item_created') {
         setItems(prev => {
           // Evita duplicatas
           if (prev.some(item => item.id === event.data.id)) return prev;
-
+          
           // Notificar se for item do mural
           if (event.data.category === 'mural') {
             notifyNewMuralItem(event.data);
           }
-
+          
           return [...prev, event.data];
         });
         toast.success('Nova lista adicionada! 💕');
       } else if (event.type === 'item_updated') {
-        setItems(prev => prev.map(item =>
+        setItems(prev => prev.map(item => 
           item.id === event.data.id ? event.data : item
         ));
       } else if (event.type === 'item_deleted') {
@@ -124,7 +153,7 @@ export default function Home() {
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-
+    
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -138,15 +167,15 @@ export default function Home() {
 
   useEffect(() => {
     let isActive = true;
-
+    
     const init = async () => {
       if (isActive) {
         await loadItems();
       }
     };
-
+    
     init();
-
+    
     return () => {
       isActive = false;
     };
@@ -157,22 +186,22 @@ export default function Home() {
       // Debug: Check if token exists before making API call
       const token = localStorage.getItem('authToken');
       console.log('[loadItems] Token in localStorage:', token ? `${token.substring(0, 50)}...` : 'MISSING');
-
+      
       const fetchedItems = await api.getItems();
       if (Array.isArray(fetchedItems)) {
         // Check if there are updates (compare with current items)
-        const hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !==
-          JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
-
+        const hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !== 
+                          JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
+        
         // Items come WITHOUT photos - they will be loaded on-demand
         setItems(fetchedItems);
-
+        
         // Show toast only if this is a silent update and there are changes
         if (silent && hasUpdates && items.length > 0) {
           const partnerName = userProfile === 'Amanda' ? 'Mateus' : 'Amanda';
           toast.info(`${partnerName} atualizou a lista! 💕`, { duration: 2000 });
         }
-
+        
         // Save to localStorage for offline mode (without photos to save space)
         try {
           const itemsForStorage = fetchedItems.map(item => ({
@@ -189,7 +218,7 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Failed to load items:', error);
-
+      
       // Only show error if this is not a silent update
       if (!silent) {
         // Try to load from localStorage
@@ -350,7 +379,7 @@ export default function Home() {
       localStorage.setItem('offlineItems', JSON.stringify(newItems));
       toast.info('Item adicionado localmente (modo offline)');
     }
-
+    
     setShowAddModal(false);
     toast.success('Item adicionado com sucesso!');
   };
@@ -385,16 +414,16 @@ export default function Home() {
       localStorage.setItem('offlineItems', JSON.stringify(newItems));
       toast.info('Post adicionado localmente (modo offline)');
     }
-
+    
     toast.success('Post adicionado ao mural!');
   };
 
   const handleUpdateItem = async (id: string, updates: Partial<ListItem>) => {
     const item = items.find(i => i.id === id);
-    const updatedItems = items.map(item =>
+    const updatedItems = items.map(item => 
       item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item
     );
-
+    
     try {
       const updatedItem = await syncApi.updateItem(id, updates);
       const finalItems = items.map(item => item.id === id ? updatedItem : item);
@@ -405,7 +434,7 @@ export default function Home() {
       // Fallback to offline mode
       setItems(updatedItems);
       localStorage.setItem('offlineItems', JSON.stringify(updatedItems));
-
+      
       // Feedback específico para lembretes ou genérico
       if (item?.category === 'alarm' && 'reminderActive' in updates) {
         toast.info(updates.reminderActive ? 'Lembrete ativado localmente (modo offline)' : 'Lembrete desativado localmente (modo offline)');
@@ -414,7 +443,7 @@ export default function Home() {
       }
       return;
     }
-
+    
     // Feedback específico para lembretes ou genérico
     if (item?.category === 'alarm' && 'reminderActive' in updates) {
       toast.success(updates.reminderActive ? 'Lembrete ativado!' : 'Lembrete desativado!');
@@ -425,7 +454,7 @@ export default function Home() {
 
   const handleDeleteItem = async (id: string) => {
     const filteredItems = items.filter(item => item.id !== id);
-
+    
     try {
       await syncApi.deleteItem(id);
       setItems(filteredItems);
@@ -437,7 +466,7 @@ export default function Home() {
       localStorage.setItem('offlineItems', JSON.stringify(filteredItems));
       toast.info('Item removido localmente (modo offline)');
     }
-
+    
     setExpandedItemId(null);
     toast.success('Item removido!');
   };
@@ -455,12 +484,12 @@ export default function Home() {
   const handleMarkViewed = async (id: string) => {
     const item = items.find(i => i.id === id);
     if (!item) return;
-
+    
     // Adiciona o usuário atual ao array de visualizações
     const viewedBy = item.viewedBy || [];
     if (!viewedBy.includes(userProfile)) {
-      await handleUpdateItem(id, {
-        viewedBy: [...viewedBy, userProfile]
+      await handleUpdateItem(id, { 
+        viewedBy: [...viewedBy, userProfile] 
       });
     }
   };
@@ -468,18 +497,18 @@ export default function Home() {
   const handleToggleLike = async (id: string) => {
     const item = items.find(i => i.id === id);
     if (!item) return;
-
+    
     // Não pode curtir o próprio post
     if (item.createdBy === userProfile) return;
-
+    
     // Toggle do like
     const likedBy = item.likedBy || [];
     const newLikedBy = likedBy.includes(userProfile)
       ? likedBy.filter(user => user !== userProfile) // Remove like
       : [...likedBy, userProfile]; // Adiciona like
-
-    await handleUpdateItem(id, {
-      likedBy: newLikedBy
+    
+    await handleUpdateItem(id, { 
+      likedBy: newLikedBy 
     });
   };
 
@@ -493,11 +522,11 @@ export default function Home() {
   });
 
   // Para categoria 'dates', todos os itens são considerados "pending" (não tem separação)
-  const pendingItems = activeCategory === 'dates'
-    ? filteredItems
+  const pendingItems = activeCategory === 'dates' 
+    ? filteredItems 
     : filteredItems.filter(item => item.status === 'pending');
-  const doneItems = activeCategory === 'dates'
-    ? []
+  const doneItems = activeCategory === 'dates' 
+    ? [] 
     : filteredItems.filter(item => item.status === 'done');
 
   // Para o mural, ordenar por mais recentes primeiro (reverse chronological)
@@ -508,14 +537,14 @@ export default function Home() {
       return dateB - dateA; // Mais recentes primeiro (criados por último no topo)
     });
   }
-
+  
   // Para todas as categorias, favoritos sempre ficam no topo
   if (pendingItems.length > 0) {
     pendingItems.sort((a, b) => {
       // Favoritos primeiro
       if (a.isFavorite && !b.isFavorite) return -1;
       if (!a.isFavorite && b.isFavorite) return 1;
-
+      
       // Se ambos são favoritos ou nenhum é favorito, ordenar por data de criação
       // Mais recentes primeiro (criados por último no topo)
       const dateA = new Date(a.createdAt).getTime();
@@ -527,22 +556,32 @@ export default function Home() {
   const handleSwipe = (offset: number) => {
     const currentIndex = categories.findIndex(cat => cat.id === activeCategory);
     const newIndex = currentIndex + offset;
-
+    
     if (newIndex >= 0 && newIndex < categories.length) {
       setActiveCategory(categories[newIndex].id);
     }
   };
 
   return (
-    <div
-      className="min-h-screen bg-background flex flex-col font-['Quicksand',sans-serif] relative"
-      style={{
-        maxWidth: 390,
+    <div 
+      className="min-h-screen bg-background flex flex-col font-['Quicksand',sans-serif] relative" 
+      style={{ 
+        maxWidth: 390, 
         margin: '0 auto'
       }}
     >
+      {/* Top Lace Decoration */}
+      <div className="absolute top-0 left-0 right-0 w-full flex items-start justify-center pointer-events-none z-10">
+        <img 
+          src={topLaceDecoration} 
+          alt="" 
+          className="w-full h-auto object-contain opacity-40"
+          style={{ maxWidth: '100%' }}
+        />
+      </div>
+
       {/* Background Texture */}
-      <div
+      <div 
         className="absolute inset-0 pointer-events-none opacity-50"
         style={{
           backgroundImage: `url(${grainTexture})`,
@@ -553,14 +592,14 @@ export default function Home() {
 
       {/* Notification Permission Banner */}
       <NotificationPermissionBanner />
-
+      
       {/* Header */}
-      <header className="bg-transparent pt-8 pb-4 px-6 relative">
+      <header className="bg-transparent pt-16 pb-4 px-6 relative">
         {/* Decorative illustration */}
-        <div className="absolute top-2 left-0 right-0 w-full h-[100px] flex items-center justify-center pointer-events-none">
-          <img
-            src={headerDecoration}
-            alt=""
+        <div className="absolute top-10 left-0 right-0 w-full h-[100px] flex items-center justify-center pointer-events-none">
+          <img 
+            src={headerDecoration} 
+            alt="" 
             className="w-full max-w-[600px] h-auto object-contain opacity-60"
           />
         </div>
@@ -574,8 +613,8 @@ export default function Home() {
       </header>
 
       {/* List Content */}
-      <main
-        className="flex-1 pb-24 relative z-10"
+      <main 
+        className="flex-1 pb-24"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -583,7 +622,12 @@ export default function Home() {
         {/* Category Card */}
         <div className="bg-[#F8F6F4] rounded-[32px] border-2 border-[#E9E4DF] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)] p-[21px] mb-6 relative mx-6">
           {/* Label Badge */}
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#E9E4DF] rounded-full px-4 py-1">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#E9E4DF] rounded-full px-4 py-1 flex items-center gap-2">
+            <img 
+              src={showSearch ? categoryIcons.search : categoryIcons[activeCategory]} 
+              alt="" 
+              className="w-5 h-5 object-contain"
+            />
             <span className="font-['Quicksand',sans-serif] font-bold text-xs text-[#2B2A28] uppercase tracking-tight">
               {showSearch ? 'Buscar' : categories.find(c => c.id === activeCategory)?.label}
             </span>
@@ -603,21 +647,23 @@ export default function Home() {
                   }}
                   className="flex flex-col items-center gap-1"
                 >
-                  <div className={`transition-colors ${isActive ? 'text-[#4D989B]' : 'text-[#2B2A28]'
-                    }`}>
+                  <div className={`transition-colors ${
+                    isActive ? 'text-[#4D989B]' : 'text-[#2B2A28]'
+                  }`}>
                     <Icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                   </div>
                 </button>
               );
             })}
-
+            
             {/* Search Icon */}
             <button
               onClick={() => setShowSearch(!showSearch)}
               className="flex flex-col items-center gap-1"
             >
-              <div className={`transition-colors ${showSearch ? 'text-[#4D989B]' : 'text-[#2B2A28]'
-                }`}>
+              <div className={`transition-colors ${
+                showSearch ? 'text-[#4D989B]' : 'text-[#2B2A28]'
+              }`}>
                 <Search className="w-[20px] h-[20px]" strokeWidth={1.5} />
               </div>
             </button>
@@ -644,7 +690,7 @@ export default function Home() {
             </div>
           </div>
         )}
-
+        
         {loading ? (
           <div className="text-center py-12 text-muted-foreground px-6">Carregando...</div>
         ) : showSearch ? (
@@ -679,7 +725,7 @@ export default function Home() {
                           isHeroItem={true}
                         />
                       </div>
-
+                      
                       {/* Demais itens em grid 2 colunas */}
                       {pendingItems.length > 1 && (
                         <div className="grid grid-cols-2 gap-4">
@@ -748,7 +794,7 @@ export default function Home() {
                       )}
                       onUpdate={(updates) => handleUpdateItem(item.id, updates)}
                       onDelete={() => handleDeleteItem(item.id)}
-                      onMarkAsDone={() => { }}
+                      onMarkAsDone={() => {}}
                       onMarkAsPending={() => handleMarkAsPending(item.id)}
                       allItems={items}
                     />

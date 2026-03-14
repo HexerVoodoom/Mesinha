@@ -1,9 +1,9 @@
-import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
 import { X, Image as ImageIcon, Bell, BellOff, Play, ExternalLink, Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ListItem } from '../utils/api';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useState } from 'react';
 import { TextArea } from './ui/Input';
 import { TagSelector } from './TagSelector';
 import { toast } from 'sonner';
@@ -12,8 +12,8 @@ import { Checkbox } from './ui/checkbox';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { ImageModal } from './ImageModal';
 import { ConfirmationModal } from './ConfirmationModal';
-import primaryButtonBg from "../../assets/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
-import secondaryButtonBg from "../../assets/75c872bdf2a28b8670edf0ef3851acf422588625.png";
+import primaryButtonBg from "@/assets/85f171ff8cd9cb4f7140b1d04b0f2e0ecceb0615.png";
+import secondaryButtonBg from "@/assets/75c872bdf2a28b8670edf0ef3851acf422588625.png";
 
 interface ItemDetailModalProps {
   isOpen: boolean;
@@ -43,37 +43,37 @@ export function ItemDetailModal({
   const [showPhotoView, setShowPhotoView] = useState(false);
   const [showRemovePhotoConfirm, setShowRemovePhotoConfirm] = useState(false);
   const [tempVideoLink, setTempVideoLink] = useState(item.videoLink || '');
-
+  
   // Estados específicos para categoria alarm (lembretes)
   const [tempReminderTime, setTempReminderTime] = useState(item.reminderTime || '08:00');
   const [tempReminderDays, setTempReminderDays] = useState<string[]>(item.reminderDays || []);
   const [tempReminderForMateus, setTempReminderForMateus] = useState(item.reminderForMateus || false);
   const [tempReminderForAmanda, setTempReminderForAmanda] = useState(item.reminderForAmanda || false);
-
+  
   const hasPhoto = item.photo === 'HAS_PHOTO' || (item.photo && item.photo.startsWith('data:'));
-
+  
   // Extract YouTube thumbnail from videoLink
   const getYouTubeThumbnail = (url: string | undefined): string | null => {
     if (!url) return null;
-
+    
     const patterns = [
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\?\/]+)/,
       /youtube\.com\/shorts\/([^&\?\/]+)/
     ];
-
+    
     for (const pattern of patterns) {
       const match = url.match(pattern);
       if (match && match[1]) {
         return `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg`;
       }
     }
-
+    
     return null;
   };
-
+  
   const videoThumbnail = item.category === 'watch' ? getYouTubeThumbnail(tempVideoLink) : null;
   const isWatchCategory = item.category === 'watch';
-
+  
   const handlePhotoLoaded = (photo: string | null) => {
     if (photo) {
       setTempPhoto(photo);
@@ -81,22 +81,22 @@ export function ItemDetailModal({
   };
 
   const handleSave = () => {
-    const updates: Partial<ListItem> = {
-      comment: tempComment,
-      photo: tempPhoto || null
+    const updates: Partial<ListItem> = { 
+      comment: tempComment, 
+      photo: tempPhoto || null 
     };
-
+    
     if (item.category === 'alarm') {
       updates.reminderTime = tempReminderTime;
       updates.reminderDays = tempReminderDays;
       updates.reminderForMateus = tempReminderForMateus;
       updates.reminderForAmanda = tempReminderForAmanda;
     }
-
+    
     if (item.category === 'watch') {
       updates.videoLink = tempVideoLink;
     }
-
+    
     onUpdate(updates);
   };
 
@@ -112,11 +112,11 @@ export function ItemDetailModal({
         img.onload = () => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-
+          
           let width = img.width;
           let height = img.height;
           const maxSize = 1200;
-
+          
           if (width > height && width > maxSize) {
             height = (height * maxSize) / width;
             width = maxSize;
@@ -124,14 +124,14 @@ export function ItemDetailModal({
             width = (width * maxSize) / height;
             height = maxSize;
           }
-
+          
           canvas.width = width;
           canvas.height = height;
-
+          
           ctx?.drawImage(img, 0, 0, width, height);
-
+          
           const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
+          
           if (compressedDataUrl.length > 2800000) {
             const lowerQuality = canvas.toDataURL('image/jpeg', 0.5);
             resolve(lowerQuality);
@@ -166,7 +166,7 @@ export function ItemDetailModal({
   const isJokesCategory = item.category === 'jokes';
   const isOtherCategory = item.category === 'other';
   const isDone = item.status === 'done';
-
+  
   const dayLabels: Record<string, string> = {
     mon: 'Seg',
     tue: 'Ter',
@@ -176,7 +176,7 @@ export function ItemDetailModal({
     sat: 'Sáb',
     sun: 'Dom',
   };
-
+  
   const allDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
   if (!isOpen) return null;
@@ -219,11 +219,12 @@ export function ItemDetailModal({
                     }}
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/30 transition-colors"
                   >
-                    <Star
-                      className={`w-5 h-5 transition-all ${item.isFavorite
-                          ? 'text-[#FFD700] fill-[#FFD700]'
+                    <Star 
+                      className={`w-5 h-5 transition-all ${
+                        item.isFavorite 
+                          ? 'text-[#FFD700] fill-[#FFD700]' 
                           : 'text-[#8A847D]'
-                        }`}
+                      }`}
                       strokeWidth={1.5}
                       style={item.isFavorite ? { stroke: '#000000' } : undefined}
                     />
@@ -246,7 +247,7 @@ export function ItemDetailModal({
                     <p className="text-sm text-muted-foreground text-center py-4">
                       Item marcado como concluído
                     </p>
-
+                    
                     {/* Actions for done items */}
                     <div className="flex gap-3">
                       <button
@@ -284,7 +285,7 @@ export function ItemDetailModal({
                         </div>
                       </div>
                     )}
-
+                    
                     {/* Campos específicos para categoria alarm (lembretes) */}
                     {isAlarmCategory && (
                       <div className="space-y-4 bg-primary/5 rounded-lg p-4">
@@ -322,10 +323,10 @@ export function ItemDetailModal({
                             </div>
                           </div>
                         </div>
-
+                        
                         {/* Time Picker */}
                         <div>
-                          <label
+                          <label 
                             htmlFor={`time-${item.id}`}
                             className="font-['Quicksand',sans-serif] text-sm font-medium text-[#2B2A28] block mb-2"
                           >
@@ -339,7 +340,7 @@ export function ItemDetailModal({
                             className="w-full px-3 py-2 rounded-lg border border-border bg-white text-[#2B2A28] font-['Quicksand',sans-serif]"
                           />
                         </div>
-
+                        
                         {/* Day Selector */}
                         <div>
                           <label className="font-['Quicksand',sans-serif] text-sm font-medium text-[#2B2A28] block mb-2">
@@ -358,10 +359,11 @@ export function ItemDetailModal({
                                       setTempReminderDays([...tempReminderDays, day]);
                                     }
                                   }}
-                                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${isSelected
+                                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                    isSelected
                                       ? 'bg-primary text-white'
                                       : 'bg-white border border-border text-[#8A847D] hover:border-primary'
-                                    }`}
+                                  }`}
                                 >
                                   {dayLabels[day]}
                                 </button>
@@ -377,7 +379,7 @@ export function ItemDetailModal({
                       <div className="space-y-3">
                         {/* Video Thumbnail Preview */}
                         {videoThumbnail && (
-                          <div
+                          <div 
                             className="relative rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity group"
                             onClick={() => {
                               if (tempVideoLink) {
@@ -385,8 +387,8 @@ export function ItemDetailModal({
                               }
                             }}
                           >
-                            <img
-                              src={videoThumbnail}
+                            <img 
+                              src={videoThumbnail} 
                               alt={item.title}
                               className="w-full h-48 object-cover"
                             />
@@ -398,7 +400,7 @@ export function ItemDetailModal({
                             </div>
                           </div>
                         )}
-
+                        
                         {/* Watch Video Button */}
                         {tempVideoLink && (
                           <a
@@ -412,10 +414,10 @@ export function ItemDetailModal({
                             <ExternalLink className="w-4 h-4" />
                           </a>
                         )}
-
+                        
                         {/* Video Link Input */}
                         <div>
-                          <label
+                          <label 
                             htmlFor={`video-link-${item.id}`}
                             className="font-['Quicksand',sans-serif] text-sm font-medium text-[#2B2A28] block mb-2"
                           >
@@ -464,9 +466,9 @@ export function ItemDetailModal({
                             <div className="mt-2 relative rounded-lg overflow-hidden">
                               {tempPhoto && tempPhoto.startsWith('data:') ? (
                                 <>
-                                  <img
-                                    src={tempPhoto}
-                                    alt="Preview"
+                                  <img 
+                                    src={tempPhoto} 
+                                    alt="Preview" 
                                     className="w-full h-32 object-cover rounded-lg cursor-pointer"
                                     onClick={() => setShowPhotoView(true)}
                                   />
@@ -480,7 +482,7 @@ export function ItemDetailModal({
                                 </>
                               ) : hasPhoto ? (
                                 <div onClick={() => setShowPhotoView(true)} className="cursor-pointer">
-                                  <LazyPhoto
+                                  <LazyPhoto 
                                     itemId={item.id}
                                     hasPhoto={hasPhoto}
                                     className="w-full h-32 object-cover rounded-lg"
@@ -550,7 +552,7 @@ export function ItemDetailModal({
                               </label>
                             </div>
                           )}
-
+                          
                           {/* Botões de Editar e Excluir */}
                           <div className="flex gap-3">
                             <button
@@ -619,7 +621,7 @@ export function ItemDetailModal({
                     </div>
 
                     {/* + Adicionar tag link */}
-                    <button
+                    <button 
                       onClick={() => setShowTagSelector(true)}
                       className="font-['Quicksand',sans-serif] text-xs text-[#8A847D] hover:text-[#4D989B] transition-colors flex items-center gap-1"
                     >

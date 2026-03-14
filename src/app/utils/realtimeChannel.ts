@@ -4,6 +4,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 // Singleton channel - um único canal compartilhado por toda a aplicação
 let channelInstance: RealtimeChannel | null = null;
 let isSubscribed = false;
+let subscriptionPromise: Promise<void> | null = null;
 
 export type SyncEvent = 
   | { type: 'item_created'; data: any }
@@ -29,26 +30,29 @@ function initChannel() {
     }
   });
   
-  // Configurar listener
-  channelInstance
-    .on('broadcast', { event: 'sync' }, ({ payload }) => {
-      console.log('[RealtimeChannel] Received event:', payload.type);
-      
-      // Notificar todos os callbacks registrados
-      callbacks.forEach(callback => {
-        try {
-          callback(payload as SyncEvent);
-        } catch (error) {
-          console.error('[RealtimeChannel] Error in callback:', error);
+  // Criar promise de subscrição
+  subscriptionPromise = new Promise((resolve) => {
+    channelInstance!
+      .on('broadcast', { event: 'sync' }, ({ payload }) => {
+        console.log('[RealtimeChannel] Received event:', payload.type);
+        
+        // Notificar todos os callbacks registrados
+        callbacks.forEach(callback => {
+          try {
+            callback(payload as SyncEvent);
+          } catch (error) {
+            console.error('[RealtimeChannel] Error in callback:', error);
+          }
+        });
+      })
+      .subscribe((status) => {
+        console.log('[RealtimeChannel] Subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribed = true;
+          resolve();
         }
       });
-    })
-    .subscribe((status) => {
-      console.log('[RealtimeChannel] Subscription status:', status);
-      if (status === 'SUBSCRIBED') {
-        isSubscribed = true;
-      }
-    });
+  });
 
   return channelInstance;
 }
@@ -74,6 +78,7 @@ export function subscribeToSync(callback: SyncCallback): () => void {
       channelInstance.unsubscribe();
       channelInstance = null;
       isSubscribed = false;
+      subscriptionPromise = null;
     }
   };
 }
@@ -82,12 +87,21 @@ export function subscribeToSync(callback: SyncCallback): () => void {
 export async function broadcastSync(event: SyncEvent): Promise<void> {
   const channel = initChannel();
   
+  // Aguardar até que o canal esteja subscrito antes de enviar
+  if (subscriptionPromise && !isSubscribed) {
+    console.log('[RealtimeChannel] Waiting for subscription before broadcasting...');
+    await subscriptionPromise;
+  }
+  
   try {
+    // Usar o método send() que aguarda a conexão WebSocket estar pronta
     await channel.send({
       type: 'broadcast',
       event: 'sync',
       payload: event,
     });
+    
+    console.log('[RealtimeChannel] Broadcast sent:', event.type);
   } catch (error) {
     console.error('[RealtimeChannel] Failed to broadcast:', error);
   }

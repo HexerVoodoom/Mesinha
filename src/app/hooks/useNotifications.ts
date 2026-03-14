@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ListItem } from '../utils/api';
-import faviconImage from '../../assets/be6328a8ae35307c0da22bbdbf01ed618424fba1.png';
+import faviconImage from '@/assets/be6328a8ae35307c0da22bbdbf01ed618424fba1.png';
 
 interface NotificationSchedule {
   itemId: string;
