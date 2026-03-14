@@ -88,8 +88,32 @@ const categoryIcons: Record<Category | 'search', string> = {
 export default function Home() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<Category>('mural');
-  const [items, setItems] = useState<ListItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Initialize from cache for instant load
+  const [items, setItems] = useState<ListItem[]>(() => {
+    try {
+      const cached = localStorage.getItem('offlineItems');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to parse offline items on init:', e);
+    }
+    return [];
+  });
+  
+  // Only show full loading screen if we have no cached items
+  const [loading, setLoading] = useState<boolean>(() => {
+    try {
+      const cached = localStorage.getItem('offlineItems');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return !(Array.isArray(parsed) && parsed.length > 0);
+      }
+    } catch (e) {}
+    return true;
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
