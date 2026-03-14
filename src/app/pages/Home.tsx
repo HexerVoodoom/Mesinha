@@ -207,20 +207,56 @@ export default function Home() {
 
   const loadItems = async (silent: boolean = false) => {
     try {
-      // Debug: Check if token exists before making API call
-      const token = localStorage.getItem('authToken');
-      console.log('[loadItems] Token in localStorage:', token ? `${token.substring(0, 50)}...` : 'MISSING');
+      // Find the most recent updatedAt date among cached items
+      let latestUpdate: string | undefined = undefined;
+      if (items.length > 0) {
+        const dates = items
+          .map(i => i.updatedAt || i.createdAt)
+          .filter(Boolean)
+          .map(d => new Date(d!).getTime())
+          .filter(t => !isNaN(t));
+        
+        if (dates.length > 0) {
+          latestUpdate = new Date(Math.max(...dates)).toISOString();
+        }
+      }
+
+      console.log('[loadItems] Requesting items updated since:', latestUpdate || 'beginning');
       
-      const fetchedItems = await api.getItems();
+      const response = await api.getItems(latestUpdate);
+      const fetchedItems = response.items;
+      const isDelta = response.isDelta;
+
       if (Array.isArray(fetchedItems)) {
-        // Check if there are updates (compare with current items)
-        const hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !== 
-                          JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
+        let finalItems = items;
+        let hasUpdates = false;
+
+        if (isDelta) {
+          // Merge delta updates
+          if (fetchedItems.length > 0) {
+            hasUpdates = true;
+            console.log(`[loadItems] Received ${fetchedItems.length} updated items. Merging...`);
+            // Create a map by ID for fast merging
+            const itemsMap = new Map(items.map(i => [i.id, i]));
+            
+            // Add or overwrite with new items
+            fetchedItems.forEach(updatedItem => {
+              itemsMap.set(updatedItem.id, updatedItem);
+            });
+            
+            finalItems = Array.from(itemsMap.values());
+          }
+        } else {
+          // Full replace
+          hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !== 
+                       JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
+          finalItems = fetchedItems;
+        }
         
-        // Items come WITHOUT photos - they will be loaded on-demand
-        setItems(fetchedItems);
+        // Update state with merged or replaced items
+        setItems(finalItems);
         
-        // Show toast only if this is a silent update and there are changes
+        // Show toast only if there are changes and we already had items (silent reload)
         if (silent && hasUpdates && items.length > 0) {
           const partnerName = userProfile === 'Amanda' ? 'Mateus' : 'Amanda';
           toast.info(`${partnerName} atualizou a lista! 💕`, { duration: 2000 });
@@ -228,15 +264,14 @@ export default function Home() {
         
         // Save to localStorage for offline mode (without photos to save space)
         try {
-          const itemsForStorage = fetchedItems.map(item => ({
+          const itemsForStorage = finalItems.map(item => ({
             ...item,
             photo: item.photo === 'HAS_PHOTO' ? null : item.photo
           }));
           localStorage.setItem('offlineItems', JSON.stringify(itemsForStorage));
         } catch (storageError) {
           console.warn('Failed to save to localStorage (quota exceeded?):', storageError);
-          // Clear old data and try again
-          localStorage.removeItem('offlineItems');
+          localStorage.removeItem('offlineItems'); // Clear old data to prevent corrupted states
         }
         setError(null); // Clear any previous errors
       }

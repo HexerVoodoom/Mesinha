@@ -83,12 +83,28 @@ app.post("/make-server-19717bce/login", async (c) => {
 // Get all items for a couple (WITHOUT photos for performance)
 app.get("/make-server-19717bce/items", async (c) => {
   try {
-    console.log('[GET /items] Fetching all items...');
+    const updatedSince = c.req.query('updatedSince');
+    console.log(`[GET /items] Fetching items... updatedSince: ${updatedSince || 'none'}`);
+    
     const items = await kv.getByPrefix("item:");
-    console.log("[GET /items] Items fetched:", items?.length || 0);
-
+    
     // Return items with proper structure
-    const validItems = (items || []).filter(item => item && item.id);
+    let validItems = (items || []).filter(item => item && item.id);
+
+    // Apply Delta Sync filter if provided
+    let isDelta = false;
+    if (updatedSince) {
+      const sinceDate = new Date(updatedSince).getTime();
+      if (!isNaN(sinceDate)) {
+        isDelta = true;
+        validItems = validItems.filter(item => {
+          const itemDate = new Date(item.updatedAt || item.createdAt).getTime();
+          return itemDate > sinceDate;
+        });
+      }
+    }
+
+    console.log(`[GET /items] Items returning: ${validItems.length} (Delta: ${isDelta})`);
 
     // CRITICAL: Remove photos from response to reduce payload size
     // Photos will be loaded separately on-demand
@@ -104,16 +120,12 @@ app.get("/make-server-19717bce/items", async (c) => {
       console.warn(`Items truncated from ${validItems.length} to 500`);
     }
 
-    // Calculate response size
-    const jsonString = JSON.stringify({ items: limitedItems });
-    const sizeInKB = jsonString.length / 1024;
-    console.log(`Response size: ${sizeInKB.toFixed(2)}KB`);
-
     // Return with explicit headers
     return c.json({
       items: limitedItems,
       total: validItems.length,
-      truncated: validItems.length > 500
+      truncated: validItems.length > 500,
+      isDelta: isDelta
     }, 200, {
       'Content-Type': 'application/json; charset=utf-8',
     });

@@ -144,9 +144,10 @@ export const api = {
   },
 
   // Items
-  getItems: async (): Promise<ListItem[]> => {
-    const data = await fetchAPI('/items');
-    return data.items;
+  getItems: async (updatedSince?: string): Promise<{ items: ListItem[], isDelta?: boolean }> => {
+    const query = updatedSince ? `?updatedSince=${encodeURIComponent(updatedSince)}` : '';
+    const data = await fetchAPI(`/items${query}`);
+    return { items: data.items, isDelta: data.isDelta };
   },
 
   getItemPhoto: async (id: string): Promise<string | null> => {
