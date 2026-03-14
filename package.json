@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite"
+    "dev": "vite",
+    "deploy": "wrangler deploy --name mesinha --assets dist --compatibility-date 2026-03-14"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
