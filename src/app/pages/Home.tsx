@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { 
   Tv,
@@ -125,7 +125,7 @@ export default function Home() {
   const [showSearch, setShowSearch] = useState(false);
   
   // Header long press states
-  const [headerPressTimer, setHeaderPressTimer] = useState<number | null>(null);
+  const headerPressTimerRef = useRef<number | null>(null);
   const [headerPressProgress, setHeaderPressProgress] = useState(0);
   
   const userProfile = (localStorage.getItem('userProfile') || 'You') as 'Amanda' | 'Mateus';
@@ -197,6 +197,10 @@ export default function Home() {
   const handleHeaderPressStart = () => {
     setHeaderPressProgress(0);
     
+    if (headerPressTimerRef.current) {
+      clearInterval(headerPressTimerRef.current);
+    }
+    
     const startTime = Date.now();
     const duration = 3000; // 3 seconds
     
@@ -208,20 +212,20 @@ export default function Home() {
       
       if (progress >= 100) {
         clearInterval(timer);
-        setHeaderPressTimer(null);
+        headerPressTimerRef.current = null;
         setHeaderPressProgress(0);
         navigate('/settings');
         toast.success('Abrindo configurações...');
       }
     }, 16); // ~60fps
     
-    setHeaderPressTimer(timer);
+    headerPressTimerRef.current = timer;
   };
 
   const handleHeaderPressEnd = () => {
-    if (headerPressTimer) {
-      clearInterval(headerPressTimer);
-      setHeaderPressTimer(null);
+    if (headerPressTimerRef.current) {
+      clearInterval(headerPressTimerRef.current);
+      headerPressTimerRef.current = null;
       setHeaderPressProgress(0);
     }
   };
@@ -229,11 +233,11 @@ export default function Home() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (headerPressTimer) {
-        clearInterval(headerPressTimer);
+      if (headerPressTimerRef.current) {
+        clearInterval(headerPressTimerRef.current);
       }
     };
-  }, [headerPressTimer]);
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -711,6 +715,8 @@ export default function Home() {
 
         <div 
           className="relative text-center mb-4 select-none cursor-pointer"
+          style={{ WebkitTouchCallout: 'none' }}
+          onContextMenu={(e) => e.preventDefault()}
           onTouchStart={handleHeaderPressStart}
           onTouchEnd={handleHeaderPressEnd}
           onTouchCancel={handleHeaderPressEnd}

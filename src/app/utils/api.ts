@@ -213,4 +213,10 @@ export const api = {
     });
     return data.settings;
   },
+
+  // Backup
+  exportBackup: async (): Promise<any> => {
+    const data = await fetchAPI('/backup');
+    return data;
+  },
 };
