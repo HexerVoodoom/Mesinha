@@ -236,7 +236,7 @@ export function BackupSettings() {
                 placeholder="Cole seu Google Client ID aqui"
                 className="flex-1"
               />
-              <Button onClick={handleSaveClientId} variant="outline">
+              <Button onClick={handleSaveClientId} variant="secondary">
                 Salvar
               </Button>
             </div>
@@ -263,7 +263,7 @@ export function BackupSettings() {
                   </div>
                   <Button
                     onClick={handleLogoutGoogle}
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
@@ -354,7 +354,7 @@ export function BackupSettings() {
             <Button
               onClick={handleRestoreFromDrive}
               disabled={syncMode === 'local-only' || !isAuthenticated}
-              variant="outline"
+              variant="secondary"
               className="w-full"
             >
               <Download className="w-4 h-4 mr-2" />
@@ -372,7 +372,7 @@ export function BackupSettings() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button onClick={handleExportLocal} variant="outline" className="w-full">
+          <Button onClick={handleExportLocal} variant="secondary" className="w-full">
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>
@@ -385,13 +385,12 @@ export function BackupSettings() {
               className="hidden"
               id="backup-import-input"
             />
-            <label htmlFor="backup-import-input">
-              <Button variant="outline" className="w-full cursor-pointer" asChild>
-                <span>
-                  <Upload className="w-4 h-4 mr-2" />
-                  Importar
-                </span>
-              </Button>
+            <label
+              htmlFor="backup-import-input"
+              className="flex items-center justify-center gap-2 w-full px-4 py-3 text-sm cursor-pointer font-semibold text-[#2B2A28] bg-white rounded-full border border-[#E9E4DF] shadow-sm hover:bg-[#F8F6F4] transition-all"
+            >
+              <Upload className="w-4 h-4" />
+              Importar
             </label>
           </div>
         </div>
