@@ -3,7 +3,7 @@ import { syncService, SyncMode } from '../utils/syncService';
 import { googleDriveBackup } from '../utils/googleDriveBackup';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import { Card } from './ui/card';
+import { Card } from './ui/Card';
 import { toast } from 'sonner';
 import {
   Cloud,
