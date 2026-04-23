@@ -4,12 +4,12 @@
 
 **Client ID:**
 ```
-305705048348-jbfvtamh0llghkfiuntt9bqlc48vhukc.apps.googleusercontent.com
+[HIDDEN_ID].apps.googleusercontent.com
 ```
 
 **Client Secret (não usado no frontend):**
 ```
-[CHAVE_REMOVIDA_POR_SEGURANCA]
+[HIDDEN_SECRET]
 ```
 
 ## Configuração no Google Cloud Console
@@ -44,7 +44,7 @@ O aplicativo usa o seguinte escopo:
 
 2. **Cole o Client ID:**
    ```
-   305705048348-jbfvtamh0llghkfiuntt9bqlc48vhukc.apps.googleusercontent.com
+   [HIDDEN_ID].apps.googleusercontent.com
    ```
 
 3. **Clique em "Salvar"**

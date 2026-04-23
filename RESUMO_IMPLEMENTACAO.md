@@ -64,12 +64,12 @@
 
 **Client ID (já configurado no app):**
 ```
-305705048348-jbfvtamh0llghkfiuntt9bqlc48vhukc.apps.googleusercontent.com
+[HIDDEN_ID].apps.googleusercontent.com
 ```
 
 **Client Secret (não usado - apenas para referência):**
 ```
-[CHAVE_REMOVIDA_POR_SEGURANCA]
+[HIDDEN_SECRET]
 ```
 
 ## 📋 Próximos Passos para o Usuário
