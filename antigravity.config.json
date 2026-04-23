@@ -1,0 +1,70 @@
+{
+  "name": "couple-app",
+  "version": "1.0.0",
+  "framework": "react-vite",
+  "build": {
+    "command": "pnpm run build",
+    "outputDirectory": "dist",
+    "installCommand": "pnpm install"
+  },
+  "deployment": {
+    "platform": "cloudflare-pages",
+    "github": {
+      "enabled": true,
+      "autoDeployOnPush": true,
+      "branch": "main"
+    },
+    "cloudflare": {
+      "projectName": "couple-app",
+      "productionBranch": "main",
+      "previewBranches": ["dev", "staging"]
+    }
+  },
+  "environment": {
+    "production": {
+      "variables": [
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_ANON_KEY",
+        "VITE_GOOGLE_CLIENT_ID"
+      ]
+    },
+    "preview": {
+      "variables": [
+        "VITE_SUPABASE_URL",
+        "VITE_SUPABASE_ANON_KEY",
+        "VITE_GOOGLE_CLIENT_ID"
+      ]
+    }
+  },
+  "domains": {
+    "production": [],
+    "preview": []
+  },
+  "monitoring": {
+    "enabled": true,
+    "alerts": {
+      "buildFailures": true,
+      "deploymentFailures": true,
+      "errorRate": true
+    }
+  },
+  "security": {
+    "headers": {
+      "X-Frame-Options": "DENY",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Permissions-Policy": "geolocation=(), microphone=(), camera=()"
+    },
+    "csp": {
+      "enabled": false
+    }
+  },
+  "performance": {
+    "minify": true,
+    "compression": true,
+    "caching": {
+      "static": "max-age=31536000, immutable",
+      "html": "max-age=0, must-revalidate"
+    }
+  }
+}

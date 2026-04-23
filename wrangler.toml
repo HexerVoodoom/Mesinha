@@ -1,0 +1,26 @@
+# Cloudflare Pages Configuration
+name = "couple-app"
+compatibility_date = "2026-04-23"
+
+# Build configuration
+[build]
+command = "pnpm run build"
+cwd = "./"
+watch_dir = "src"
+
+[build.upload]
+format = "service-worker"
+
+# Environment variables (add via Cloudflare dashboard)
+[env.production]
+vars = { NODE_ENV = "production" }
+
+# Routes configuration
+[[routes]]
+pattern = "/*"
+zone_name = "your-domain.com"
+
+# KV Namespaces (optional for caching)
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"

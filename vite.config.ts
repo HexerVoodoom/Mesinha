@@ -2,47 +2,27 @@ import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+
+
+function figmaAssetResolver() {
+  return {
+    name: 'figma-asset-resolver',
+    resolveId(id) {
+      if (id.startsWith('figma:asset/')) {
+        const filename = id.replace('figma:asset/', '')
+        return path.resolve(__dirname, 'src/assets', filename)
+      }
+    },
+  }
+}
 
 export default defineConfig({
   plugins: [
+    figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
     // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
-    VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.ts',
-      registerType: 'autoUpdate',
-      injectManifest: {
-        swDest: 'dist/sw.js',
-      },
-      includeAssets: ['favicon.ico', 'icon-192x192.png', 'icon-512x512.png', 'firebase-messaging-sw.js'],
-      manifest: {
-        name: "Mesinha - Listas Compartilhadas",
-        short_name: "Mesinha",
-        description: "App de listas compartilhadas para casais - Mateus & Amanda",
-        theme_color: "#81D8D0",
-        background_color: "#F8F6F3",
-        display: "standalone",
-        orientation: "portrait",
-        start_url: "/",
-        icons: [
-          {
-            src: "/icon-192x192.png",
-            sizes: "192x192",
-            type: "image/png"
-          },
-          {
-            src: "/icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable"
-          }
-        ]
-      }
-    })
   ],
   resolve: {
     alias: {
@@ -53,4 +33,41 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  // Production build optimization
+  build: {
+    target: 'es2015',
+    minify: 'esbuild',
+    sourcemap: false,
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router'],
+          'ui-vendor': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          'radix-vendor': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-tabs',
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
+
+  // Server configuration for development
+  server: {
+    port: 5173,
+    strictPort: false,
+    host: true,
+  },
+
+  // Preview server configuration
+  preview: {
+    port: 4173,
+    strictPort: false,
+    host: true,
+  },
 })

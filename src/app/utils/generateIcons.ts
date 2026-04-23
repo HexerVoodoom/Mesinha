@@ -1,7 +1,7 @@
 // Utility to generate app icons with the couple illustration
 // This can be used to create downloadable icons for PWA installation
 
-import coupleImage from "@/assets/9eee8114a75bad81040c57aa669f5b269428977b.png";
+import coupleImage from "figma:asset/9eee8114a75bad81040c57aa669f5b269428977b.png";
 
 export const generateIcon = (size: number): string => {
   const canvas = document.createElement('canvas');

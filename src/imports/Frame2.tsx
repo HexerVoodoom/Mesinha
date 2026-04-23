@@ -1,4 +1,4 @@
-import imgImage82 from "@/assets/0e6fc4aa02d7b49d595a04d3f9d46687997e37ef.png";
+import imgImage82 from "figma:asset/0e6fc4aa02d7b49d595a04d3f9d46687997e37ef.png";
 
 export default function Frame() {
   return (

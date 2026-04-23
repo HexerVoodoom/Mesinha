@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { 
   Tv,
@@ -36,22 +36,22 @@ import { AddMuralModal } from '../components/AddMuralModal';
 import { SearchContent } from '../components/SearchContent';
 import { NotificationPermissionBanner } from '../components/NotificationPermissionBanner';
 import { toast } from 'sonner';
-import fabButton from "@/assets/dd4b98f23138814cb5d5f735480190b4a56f65a0.png";
-import grainTexture from "@/assets/870f87368b0cc75469636c24542ec183a844dabf.png";
-import headerDecoration from "@/assets/1f94cbc6275b0a35eb5a9c6c93b92d94e2251075.png";
-import topLaceDecoration from "@/assets/efb30badc4fa5c4da28d3bf6ea65d7d99aa6b99b.png";
-import imgIconeMural from "@/assets/f55be14c67f2ee6191fde351aa33771fce7d5b93.png";
-import imgIconLembrete from "@/assets/5097108198344c1c84390e42ebe8df3ec16868c9.png";
-import imgIconData from "@/assets/e6ae93276b700b8f8f931da6519affe6c2e9c5d0.png";
-import imgIconBobeiras from "@/assets/44df7767036d0bbe143fb9ee3102554d9c29474f.png";
-import imgIconTop3 from "@/assets/f296c57b6ed7e73b350453d968fd883591dd3581.png";
-import imgIconFilmesESeries from "@/assets/a7e6f180afcfd6cefd1ae8165ed758a29e25da14.png";
-import imgIconPesquisar from "@/assets/cb1c8fe4b905e0ba73cec7627c5b9f5168142c03.png";
-import imgIconOutros from "@/assets/9598e760cce271dc861fb90f06a336792553ef6a.png";
-import imgIconLugares from "@/assets/d4ec5ae65b7bd51ce704f9bf07164532caa53a33.png";
-import imgIconcomidas from "@/assets/2c8cffafea0b456e1dfa9a773e633226de456ac0.png";
-import imgIconVideoGame from "@/assets/783a5ddb42e8653aa6debba484cc8b75c211df92.png";
-import imgIconVieosCurtos from "@/assets/b72dc3ec57224b4caa82c0bbb8e9602e4a8602e4.png";
+import fabButton from "figma:asset/dd4b98f23138814cb5d5f735480190b4a56f65a0.png";
+import grainTexture from "figma:asset/870f87368b0cc75469636c24542ec183a844dabf.png";
+import headerDecoration from "figma:asset/1f94cbc6275b0a35eb5a9c6c93b92d94e2251075.png";
+import topLaceDecoration from "figma:asset/efb30badc4fa5c4da28d3bf6ea65d7d99aa6b99b.png";
+import imgIconeMural from "figma:asset/f55be14c67f2ee6191fde351aa33771fce7d5b93.png";
+import imgIconLembrete from "figma:asset/5097108198344c1c84390e42ebe8df3ec16868c9.png";
+import imgIconData from "figma:asset/e6ae93276b700b8f8f931da6519affe6c2e9c5d0.png";
+import imgIconBobeiras from "figma:asset/44df7767036d0bbe143fb9ee3102554d9c29474f.png";
+import imgIconTop3 from "figma:asset/f296c57b6ed7e73b350453d968fd883591dd3581.png";
+import imgIconFilmesESeries from "figma:asset/a7e6f180afcfd6cefd1ae8165ed758a29e25da14.png";
+import imgIconPesquisar from "figma:asset/cb1c8fe4b905e0ba73cec7627c5b9f5168142c03.png";
+import imgIconOutros from "figma:asset/9598e760cce271dc861fb90f06a336792553ef6a.png";
+import imgIconLugares from "figma:asset/d4ec5ae65b7bd51ce704f9bf07164532caa53a33.png";
+import imgIconcomidas from "figma:asset/2c8cffafea0b456e1dfa9a773e633226de456ac0.png";
+import imgIconVideoGame from "figma:asset/783a5ddb42e8653aa6debba484cc8b75c211df92.png";
+import imgIconVieosCurtos from "figma:asset/b72dc3ec57224b4caa82c0bbb8e9602e4a8602e4.png";
 
 type Category = 'watch' | 'movies' | 'games' | 'food' | 'places' | 'dates' | 'jokes' | 'alarm' | 'top3' | 'mural' | 'other';
 
@@ -88,32 +88,8 @@ const categoryIcons: Record<Category | 'search', string> = {
 export default function Home() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<Category>('mural');
-  
-  // Initialize from cache for instant load
-  const [items, setItems] = useState<ListItem[]>(() => {
-    try {
-      const cached = localStorage.getItem('offlineItems');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {
-      console.warn('Failed to parse offline items on init:', e);
-    }
-    return [];
-  });
-  
-  // Only show full loading screen if we have no cached items
-  const [loading, setLoading] = useState<boolean>(() => {
-    try {
-      const cached = localStorage.getItem('offlineItems');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        return !(Array.isArray(parsed) && parsed.length > 0);
-      }
-    } catch (e) {}
-    return true;
-  });
+  const [items, setItems] = useState<ListItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
@@ -123,11 +99,28 @@ export default function Home() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(false);
-  
+
+  // Paginação - 7 itens por página
+  const [currentPage, setCurrentPage] = useState<Record<Category, number>>({
+    watch: 1,
+    movies: 1,
+    games: 1,
+    food: 1,
+    places: 1,
+    dates: 1,
+    jokes: 1,
+    alarm: 1,
+    top3: 1,
+    mural: 1,
+    other: 1,
+  });
+  const [loadedCategories, setLoadedCategories] = useState<Set<Category>>(new Set(['mural']));
+  const ITEMS_PER_PAGE = 7;
+
   // Header long press states
-  const headerPressTimerRef = useRef<number | null>(null);
+  const [headerPressTimer, setHeaderPressTimer] = useState<number | null>(null);
   const [headerPressProgress, setHeaderPressProgress] = useState(0);
-  
+
   const userProfile = (localStorage.getItem('userProfile') || 'You') as 'Amanda' | 'Mateus';
 
   // Sistema de notificações
@@ -197,10 +190,6 @@ export default function Home() {
   const handleHeaderPressStart = () => {
     setHeaderPressProgress(0);
     
-    if (headerPressTimerRef.current) {
-      clearInterval(headerPressTimerRef.current);
-    }
-    
     const startTime = Date.now();
     const duration = 3000; // 3 seconds
     
@@ -212,20 +201,20 @@ export default function Home() {
       
       if (progress >= 100) {
         clearInterval(timer);
-        headerPressTimerRef.current = null;
+        setHeaderPressTimer(null);
         setHeaderPressProgress(0);
         navigate('/settings');
         toast.success('Abrindo configurações...');
       }
     }, 16); // ~60fps
     
-    headerPressTimerRef.current = timer;
+    setHeaderPressTimer(timer);
   };
 
   const handleHeaderPressEnd = () => {
-    if (headerPressTimerRef.current) {
-      clearInterval(headerPressTimerRef.current);
-      headerPressTimerRef.current = null;
+    if (headerPressTimer) {
+      clearInterval(headerPressTimer);
+      setHeaderPressTimer(null);
       setHeaderPressProgress(0);
     }
   };
@@ -233,95 +222,73 @@ export default function Home() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (headerPressTimerRef.current) {
-        clearInterval(headerPressTimerRef.current);
+      if (headerPressTimer) {
+        clearInterval(headerPressTimer);
       }
     };
-  }, []);
+  }, [headerPressTimer]);
 
   useEffect(() => {
     let isActive = true;
-    
+
     const init = async () => {
       if (isActive) {
         await loadItems();
       }
     };
-    
+
     init();
-    
+
     return () => {
       isActive = false;
     };
   }, []);
 
-  const loadItems = async (silent: boolean = false) => {
+  // Carregar dados quando uma categoria é aberta pela primeira vez
+  useEffect(() => {
+    if (!loadedCategories.has(activeCategory)) {
+      setLoadedCategories(prev => new Set([...prev, activeCategory]));
+    }
+  }, [activeCategory]);
+
+  const loadItems = async (silent: boolean = false, categoryFilter?: string, offset = 0) => {
     try {
-      // Find the most recent updatedAt date among cached items
-      let latestUpdate: string | undefined = undefined;
-      if (items.length > 0) {
-        const dates = items
-          .map(i => i.updatedAt || i.createdAt)
-          .filter(Boolean)
-          .map(d => new Date(d!).getTime())
-          .filter(t => !isNaN(t));
-        
-        if (dates.length > 0) {
-          latestUpdate = new Date(Math.max(...dates)).toISOString();
-        }
-      }
+      // Debug: Check if token exists before making API call
+      const token = localStorage.getItem('authToken');
+      console.log('[loadItems] Token in localStorage:', token ? `${token.substring(0, 50)}...` : 'MISSING');
 
-      console.log('[loadItems] Requesting items updated since:', latestUpdate || 'beginning');
-      
-      const response = await api.getItems(latestUpdate);
-      const fetchedItems = response.items;
-      const isDelta = response.isDelta;
+      const result = await api.getItems(categoryFilter, offset, 100);
+      if (result && Array.isArray(result.items)) {
+        const fetchedItems = result.items;
 
-      if (Array.isArray(fetchedItems)) {
-        let finalItems = items;
-        let hasUpdates = false;
+        // Check if there are updates (compare with current items)
+        const hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !==
+                          JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
 
-        if (isDelta) {
-          // Merge delta updates
-          if (fetchedItems.length > 0) {
-            hasUpdates = true;
-            console.log(`[loadItems] Received ${fetchedItems.length} updated items. Merging...`);
-            // Create a map by ID for fast merging
-            const itemsMap = new Map(items.map(i => [i.id, i]));
-            
-            // Add or overwrite with new items
-            fetchedItems.forEach(updatedItem => {
-              itemsMap.set(updatedItem.id, updatedItem);
-            });
-            
-            finalItems = Array.from(itemsMap.values());
-          }
+        // If offset > 0, append to existing items; otherwise replace
+        if (offset > 0) {
+          setItems(prev => [...prev, ...fetchedItems]);
         } else {
-          // Full replace
-          hasUpdates = JSON.stringify(items.map(i => ({ id: i.id, updatedAt: i.updatedAt }))) !== 
-                       JSON.stringify(fetchedItems.map(i => ({ id: i.id, updatedAt: i.updatedAt })));
-          finalItems = fetchedItems;
+          setItems(fetchedItems);
         }
-        
-        // Update state with merged or replaced items
-        setItems(finalItems);
-        
-        // Show toast only if there are changes and we already had items (silent reload)
+
+        // Show toast only if this is a silent update and there are changes
         if (silent && hasUpdates && items.length > 0) {
           const partnerName = userProfile === 'Amanda' ? 'Mateus' : 'Amanda';
           toast.info(`${partnerName} atualizou a lista! 💕`, { duration: 2000 });
         }
-        
+
         // Save to localStorage for offline mode (without photos to save space)
         try {
-          const itemsForStorage = finalItems.map(item => ({
+          const itemsForStorage = fetchedItems.map(item => ({
             ...item,
             photo: item.photo === 'HAS_PHOTO' ? null : item.photo
           }));
           localStorage.setItem('offlineItems', JSON.stringify(itemsForStorage));
         } catch (storageError) {
           console.warn('Failed to save to localStorage (quota exceeded?):', storageError);
-          localStorage.removeItem('offlineItems'); // Clear old data to prevent corrupted states
+          // Clear old data and try again
+          localStorage.removeItem('offlineItems');
         }
         setError(null); // Clear any previous errors
       }
@@ -631,29 +598,29 @@ export default function Home() {
   });
 
   // Para categoria 'dates', todos os itens são considerados "pending" (não tem separação)
-  const pendingItems = activeCategory === 'dates' 
-    ? filteredItems 
+  let allPendingItems = activeCategory === 'dates'
+    ? filteredItems
     : filteredItems.filter(item => item.status === 'pending');
-  const doneItems = activeCategory === 'dates' 
-    ? [] 
+  let allDoneItems = activeCategory === 'dates'
+    ? []
     : filteredItems.filter(item => item.status === 'done');
 
   // Para o mural, ordenar por mais recentes primeiro (reverse chronological)
-  if (activeCategory === 'mural' && pendingItems.length > 0) {
-    pendingItems.sort((a, b) => {
+  if (activeCategory === 'mural' && allPendingItems.length > 0) {
+    allPendingItems.sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
       return dateB - dateA; // Mais recentes primeiro (criados por último no topo)
     });
   }
-  
+
   // Para todas as categorias, favoritos sempre ficam no topo
-  if (pendingItems.length > 0) {
-    pendingItems.sort((a, b) => {
+  if (allPendingItems.length > 0) {
+    allPendingItems.sort((a, b) => {
       // Favoritos primeiro
       if (a.isFavorite && !b.isFavorite) return -1;
       if (!a.isFavorite && b.isFavorite) return 1;
-      
+
       // Se ambos são favoritos ou nenhum é favorito, ordenar por data de criação
       // Mais recentes primeiro (criados por último no topo)
       const dateA = new Date(a.createdAt).getTime();
@@ -662,12 +629,37 @@ export default function Home() {
     });
   }
 
+  // Aplicar paginação - mostrar apenas itens até a página atual
+  const page = currentPage[activeCategory];
+  const maxItems = page * ITEMS_PER_PAGE;
+  const pendingItems = allPendingItems.slice(0, maxItems);
+  const doneItems = allDoneItems.slice(0, maxItems);
+
+  const hasMorePending = allPendingItems.length > maxItems;
+  const hasMoreDone = allDoneItems.length > maxItems;
+
+  const loadMoreItems = () => {
+    setCurrentPage(prev => ({
+      ...prev,
+      [activeCategory]: prev[activeCategory] + 1,
+    }));
+  };
+
   const handleSwipe = (offset: number) => {
     const currentIndex = categories.findIndex(cat => cat.id === activeCategory);
     const newIndex = currentIndex + offset;
-    
+
     if (newIndex >= 0 && newIndex < categories.length) {
       setActiveCategory(categories[newIndex].id);
+    }
+  };
+
+  const handleCategoryChange = (categoryId: Category) => {
+    setActiveCategory(categoryId);
+    setShowSearch(false);
+    // Resetar página quando trocar de categoria se ainda não foi carregada
+    if (!loadedCategories.has(categoryId)) {
+      setCurrentPage(prev => ({ ...prev, [categoryId]: 1 }));
     }
   };
 
@@ -715,8 +707,6 @@ export default function Home() {
 
         <div 
           className="relative text-center mb-4 select-none cursor-pointer"
-          style={{ WebkitTouchCallout: 'none' }}
-          onContextMenu={(e) => e.preventDefault()}
           onTouchStart={handleHeaderPressStart}
           onTouchEnd={handleHeaderPressEnd}
           onTouchCancel={handleHeaderPressEnd}
@@ -770,10 +760,7 @@ export default function Home() {
               return (
                 <button
                   key={category.id}
-                  onClick={() => {
-                    setActiveCategory(category.id);
-                    setShowSearch(false);
-                  }}
+                  onClick={() => handleCategoryChange(category.id)}
                   className="flex flex-col items-center gap-1"
                 >
                   <div className={`transition-colors ${
@@ -784,7 +771,7 @@ export default function Home() {
                 </button>
               );
             })}
-            
+
             {/* Search Icon */}
             <button
               onClick={() => setShowSearch(!showSearch)}
@@ -854,7 +841,7 @@ export default function Home() {
                           isHeroItem={true}
                         />
                       </div>
-                      
+
                       {/* Demais itens em grid 2 colunas */}
                       {pendingItems.length > 1 && (
                         <div className="grid grid-cols-2 gap-4">
@@ -904,6 +891,18 @@ export default function Home() {
               )}
             </div>
 
+            {/* Botão Carregar Mais - Pending Items */}
+            {hasMorePending && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={loadMoreItems}
+                  className="px-6 py-2 bg-[#F8F6F4] border-2 border-[#E9E4DF] rounded-full font-['Quicksand',sans-serif] font-bold text-sm text-[#2B2A28] hover:bg-[#E9E4DF] transition-colors"
+                >
+                  Carregar mais ({allPendingItems.length - pendingItems.length} restantes)
+                </button>
+              </div>
+            )}
+
             {/* Done Section - não mostrar para categoria alarm, top3 e mural */}
             {doneItems.length > 0 && activeCategory !== 'alarm' && activeCategory !== 'top3' && activeCategory !== 'mural' && (
               <div className="mt-8">
@@ -929,6 +928,18 @@ export default function Home() {
                     />
                   ))}
                 </div>
+
+                {/* Botão Carregar Mais - Done Items */}
+                {hasMoreDone && (
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      onClick={loadMoreItems}
+                      className="px-6 py-2 bg-[#F8F6F4] border-2 border-[#E9E4DF] rounded-full font-['Quicksand',sans-serif] font-bold text-sm text-[#2B2A28] hover:bg-[#E9E4DF] transition-colors"
+                    >
+                      Carregar mais ({allDoneItems.length - doneItems.length} restantes)
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

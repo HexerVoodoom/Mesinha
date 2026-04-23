@@ -380,5 +380,45 @@ app.put("/make-server-19717bce/settings", async (c) => {
   }
 });
 
+// Backup - Export all data
+app.get("/make-server-19717bce/backup", async (c) => {
+  try {
+    console.log('[GET /backup] Starting backup export...');
+    
+    // Fetch all items with photos
+    const items = await kv.getByPrefix("item:");
+    console.log(`[GET /backup] Found ${items?.length || 0} items`);
+    
+    // Fetch settings
+    const settings = await kv.get("settings") || {
+      coupleName: "You & Partner",
+      themeColor: "#81D8D0",
+      notificationsEnabled: true,
+    };
+    
+    // Create backup object
+    const backup = {
+      version: "1.0.0",
+      exportDate: new Date().toISOString(),
+      data: {
+        settings,
+        items: items || [],
+      },
+      stats: {
+        totalItems: items?.length || 0,
+      }
+    };
+    
+    console.log('[GET /backup] Backup created successfully');
+    return c.json(backup);
+  } catch (error) {
+    console.error("[GET /backup] Backup error:", error);
+    return c.json({ 
+      error: "Failed to create backup", 
+      details: error instanceof Error ? error.message : String(error) 
+    }, 500);
+  }
+});
+
 // Serve the application
 Deno.serve(app.fetch);

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Bell, Download, Upload } from 'lucide-react';
+import { ArrowLeft, Bell, Download, Upload, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { api, Settings as SettingsType, ListItem } from '../utils/api';
 import { syncApi } from '../utils/syncApi';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
 import { toast } from 'sonner';
+import { BackupSettings } from '../components/BackupSettings';
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [daysRemaining, setDaysRemaining] = useState(0);
+  const [showAdvancedBackup, setShowAdvancedBackup] = useState(false);
 
   // Realtime Sync para configurações
   useRealtimeSync({
@@ -30,6 +33,41 @@ export default function Settings() {
 
   useEffect(() => {
     loadSettings();
+  }, []);
+
+  // Calculate days remaining from start date (March 29, 2026)
+  useEffect(() => {
+    const calculateDays = () => {
+      // Start date: March 29, 2026 (500 days countdown)
+      const startDate = new Date('2026-03-29T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const diffTime = today.getTime() - startDate.getTime();
+      const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const remaining = 500 - daysPassed;
+
+      setDaysRemaining(remaining);
+    };
+
+    calculateDays();
+
+    // Calculate time until next midnight
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+
+    // Set timer to update at midnight
+    const midnightTimer = setTimeout(() => {
+      calculateDays();
+      // Set interval for subsequent days
+      const dailyInterval = setInterval(calculateDays, 24 * 60 * 60 * 1000);
+      return () => clearInterval(dailyInterval);
+    }, timeUntilMidnight);
+
+    return () => clearTimeout(midnightTimer);
   }, []);
 
   const loadSettings = async () => {
@@ -174,6 +212,18 @@ export default function Settings() {
             <p className="text-base text-muted-foreground mt-1">Juntos compartilhando tudo</p>
           </div>
 
+          {/* Days Counter */}
+          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-6 border border-primary/20">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-6 h-6 text-primary" />
+              <div className="flex-1">
+                <div className="text-sm text-muted-foreground mb-1">Dias restantes</div>
+                <div className="text-3xl font-bold text-primary mb-2">{daysRemaining}</div>
+                <div className="text-xs text-muted-foreground">Início: 29 de março de 2026</div>
+              </div>
+            </div>
+          </div>
+
           {/* Notifications */}
           <div className="bg-card rounded-xl p-6 border border-border">
             <div className="flex items-center justify-between">
@@ -200,7 +250,7 @@ export default function Settings() {
           {/* Backup Section */}
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-muted-foreground px-2">Backup de Dados</h3>
-            
+
             {/* Export Backup */}
             <button 
               onClick={handleExportBackup}
@@ -237,6 +287,27 @@ export default function Settings() {
               onChange={handleFileChange}
               className="hidden"
             />
+          </div>
+
+          {/* Advanced Backup Settings */}
+          <div className="space-y-3">
+            <button
+              onClick={() => setShowAdvancedBackup(!showAdvancedBackup)}
+              className="w-full bg-card rounded-xl p-4 border border-border hover:bg-muted/30 transition-colors flex items-center justify-between"
+            >
+              <h3 className="text-base font-medium">Configurações Avançadas de Backup</h3>
+              {showAdvancedBackup ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </button>
+
+            {showAdvancedBackup && (
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
+                <BackupSettings />
+              </div>
+            )}
           </div>
         </div>
       )}

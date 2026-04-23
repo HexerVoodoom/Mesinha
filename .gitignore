@@ -1,1 +1,9 @@
 node_modules
+MESINHA/
+mesinha/
+.*env*
+android/.gradle/
+*.log
+*.glb
+*.apk
+*.aab

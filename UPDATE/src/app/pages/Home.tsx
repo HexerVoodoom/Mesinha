@@ -100,6 +100,10 @@ export default function Home() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   
+  // Header long press states
+  const [headerPressTimer, setHeaderPressTimer] = useState<number | null>(null);
+  const [headerPressProgress, setHeaderPressProgress] = useState(0);
+  
   const userProfile = (localStorage.getItem('userProfile') || 'You') as 'Amanda' | 'Mateus';
 
   // Sistema de notificações
@@ -164,6 +168,48 @@ export default function Home() {
       handleSwipe(-1); // Previous category
     }
   };
+
+  // Header long press handlers
+  const handleHeaderPressStart = () => {
+    setHeaderPressProgress(0);
+    
+    const startTime = Date.now();
+    const duration = 3000; // 3 seconds
+    
+    const timer = window.setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / duration) * 100, 100);
+      
+      setHeaderPressProgress(progress);
+      
+      if (progress >= 100) {
+        clearInterval(timer);
+        setHeaderPressTimer(null);
+        setHeaderPressProgress(0);
+        navigate('/settings');
+        toast.success('Abrindo configurações...');
+      }
+    }, 16); // ~60fps
+    
+    setHeaderPressTimer(timer);
+  };
+
+  const handleHeaderPressEnd = () => {
+    if (headerPressTimer) {
+      clearInterval(headerPressTimer);
+      setHeaderPressTimer(null);
+      setHeaderPressProgress(0);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (headerPressTimer) {
+        clearInterval(headerPressTimer);
+      }
+    };
+  }, [headerPressTimer]);
 
   useEffect(() => {
     let isActive = true;
@@ -604,11 +650,29 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative text-center mb-4">
+        <div 
+          className="relative text-center mb-4 select-none cursor-pointer"
+          onTouchStart={handleHeaderPressStart}
+          onTouchEnd={handleHeaderPressEnd}
+          onTouchCancel={handleHeaderPressEnd}
+          onMouseDown={handleHeaderPressStart}
+          onMouseUp={handleHeaderPressEnd}
+          onMouseLeave={handleHeaderPressEnd}
+        >
           <h1 className="font-['Quicksand',sans-serif] text-[#2B2A28] tracking-tight leading-tight">
             <div className="font-normal text-[20px] mb-1">- Mesinha -</div>
             <div className="font-bold text-[28px]">Amanda & Mateus</div>
           </h1>
+          
+          {/* Progress indicator */}
+          {headerPressProgress > 0 && (
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-muted/30 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${headerPressProgress}%` }}
+              />
+            </div>
+          )}
         </div>
       </header>
 

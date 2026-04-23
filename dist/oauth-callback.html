@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Drive - Autenticação</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 {
+            color: #1a202c;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        p {
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        .spinner {
+            margin: 2rem auto;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .success {
+            color: #48bb78;
+            font-weight: 600;
+        }
+        .error {
+            color: #f56565;
+            font-weight: 600;
+        }
+        .debug {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            text-align: left;
+            color: #2d3748;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google Drive</h1>
+        <div class="spinner"></div>
+        <p id="status">Processando autenticação...</p>
+        <div id="debug" class="debug" style="display: none;"></div>
+    </div>
+
+    <script>
+        (function() {
+            const statusEl = document.getElementById('status');
+            const debugEl = document.getElementById('debug');
+
+            function log(msg) {
+                console.log(msg);
+                debugEl.innerHTML += msg + '<br>';
+                debugEl.style.display = 'block';
+            }
+
+            try {
+                log('Script iniciado');
+                log('URL: ' + window.location.href);
+
+                // Parse the hash fragment
+                const hash = window.location.hash.substring(1);
+                log('Hash: ' + hash);
+
+                const params = new URLSearchParams(hash);
+
+                const access_token = params.get('access_token');
+                const expires_in = params.get('expires_in');
+                const error = params.get('error');
+
+                log('access_token: ' + (access_token ? 'presente' : 'ausente'));
+                log('expires_in: ' + expires_in);
+                log('error: ' + error);
+
+                if (error) {
+                    statusEl.textContent = 'Autenticação cancelada ou falhou';
+                    statusEl.className = 'error';
+                    setTimeout(() => window.close(), 2000);
+                    return;
+                }
+
+                if (access_token && expires_in) {
+                    log('Token recebido, tentando enviar para janela pai...');
+
+                    // Try multiple methods to communicate with parent
+                    const message = {
+                        type: 'google-oauth-token',
+                        access_token: access_token,
+                        expires_in: parseInt(expires_in, 10)
+                    };
+
+                    // Method 1: window.opener
+                    if (window.opener) {
+                        log('window.opener encontrado');
+                        try {
+                            window.opener.postMessage(message, '*');
+                            log('Mensagem enviada via window.opener');
+                        } catch (e) {
+                            log('Erro ao enviar via window.opener: ' + e.message);
+                        }
+                    } else {
+                        log('window.opener não encontrado');
+                    }
+
+                    // Method 2: window.parent (iframe fallback)
+                    if (window.parent && window.parent !== window) {
+                        log('window.parent encontrado');
+                        try {
+                            window.parent.postMessage(message, '*');
+                            log('Mensagem enviada via window.parent');
+                        } catch (e) {
+                            log('Erro ao enviar via window.parent: ' + e.message);
+                        }
+                    }
+
+                    // Method 3: localStorage (fallback)
+                    try {
+                        localStorage.setItem('google_access_token', access_token);
+                        localStorage.setItem('google_token_expiry', (Date.now() + (parseInt(expires_in, 10) * 1000)).toString());
+                        log('Token salvo no localStorage');
+                    } catch (e) {
+                        log('Erro ao salvar no localStorage: ' + e.message);
+                    }
+
+                    statusEl.textContent = 'Autenticação bem-sucedida! Você pode fechar esta janela.';
+                    statusEl.className = 'success';
+
+                    // Try to close after delay
+                    setTimeout(() => {
+                        try {
+                            window.close();
+                        } catch (e) {
+                            log('Não foi possível fechar a janela automaticamente');
+                        }
+                    }, 2000);
+
+                } else {
+                    statusEl.textContent = 'Erro: token não recebido';
+                    statusEl.className = 'error';
+                    log('Token ou expires_in ausente');
+                }
+            } catch (err) {
+                console.error('OAuth callback error:', err);
+                log('ERRO: ' + err.message);
+                statusEl.textContent = 'Erro ao processar autenticação';
+                statusEl.className = 'error';
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Bell, Palette, Download, Info } from 'lucide-react';
-import { api, Settings as SettingsType } from '../utils/api';
+import { ArrowLeft, Bell, Download, Upload } from 'lucide-react';
+import { api, Settings as SettingsType, ListItem } from '../utils/api';
 import { syncApi } from '../utils/syncApi';
 import { useRealtimeSync } from '../hooks/useRealtimeSync';
 import { toast } from 'sonner';
-
-const themeColors = [
-  { name: 'Tiffany Blue', value: '#81D8D0' },
-  { name: 'Rose', value: '#FFB6C1' },
-  { name: 'Lavender', value: '#E6E6FA' },
-  { name: 'Mint', value: '#98FB98' },
-  { name: 'Peach', value: '#FFDAB9' },
-];
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -23,6 +15,7 @@ export default function Settings() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Realtime Sync para configurações
   useRealtimeSync({
@@ -65,6 +58,91 @@ export default function Settings() {
     }
   };
 
+  const handleExportBackup = async () => {
+    try {
+      toast.loading('Gerando backup...', { id: 'backup' });
+      
+      const backupData = await api.exportBackup();
+      
+      // Create a blob and download it
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Generate filename with current date
+      const date = new Date().toISOString().split('T')[0];
+      link.download = `mesinha-backup-${date}.json`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Backup exportado! ${backupData.stats.totalItems} itens salvos.`, { id: 'backup' });
+    } catch (error) {
+      console.error('Failed to export backup:', error);
+      toast.error('Falha ao exportar backup', { id: 'backup' });
+    }
+  };
+
+  const handleImportBackup = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      toast.loading('Importando backup...', { id: 'import' });
+      
+      const text = await file.text();
+      const backupData = JSON.parse(text);
+      
+      // Validate backup structure
+      if (!backupData.data || !backupData.data.items || !backupData.data.settings) {
+        throw new Error('Formato de backup inválido');
+      }
+
+      // Import settings
+      if (backupData.data.settings) {
+        await syncApi.updateSettings(backupData.data.settings);
+        setSettings(backupData.data.settings);
+      }
+
+      // Import items
+      if (backupData.data.items && Array.isArray(backupData.data.items)) {
+        // Delete all existing items first
+        const existingItems = await api.getItems();
+        for (const item of existingItems) {
+          await syncApi.deleteItem(item.id);
+        }
+
+        // Create all items from backup
+        for (const item of backupData.data.items) {
+          await syncApi.createItem(item);
+        }
+      }
+
+      toast.success(`Backup importado! ${backupData.data.items.length} itens restaurados.`, { id: 'import' });
+      
+      // Reload the page to reflect changes
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Failed to import backup:', error);
+      toast.error('Falha ao importar backup. Verifique o arquivo.', { id: 'import' });
+    }
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background" style={{ maxWidth: 390, margin: '0 auto' }}>
       {/* Header */}
@@ -92,44 +170,8 @@ export default function Settings() {
           {/* Couple Name Header */}
           <div className="text-center py-6">
             <div className="text-5xl mb-2">💕</div>
-            <h2 className="text-2xl font-medium text-foreground">{settings.coupleName}</h2>
+            <h2 className="text-2xl font-medium text-foreground">Amanda & Mateus</h2>
             <p className="text-base text-muted-foreground mt-1">Juntos compartilhando tudo</p>
-          </div>
-
-          {/* Couple Name */}
-          <div className="bg-card rounded-xl p-6 border border-border">
-            <label className="text-base font-medium mb-3 block">Nome do Casal</label>
-            <input
-              type="text"
-              value={settings.coupleName}
-              onChange={(e) => setSettings({ ...settings, coupleName: e.target.value })}
-              onBlur={() => handleSave({ coupleName: settings.coupleName })}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Ex: João & Maria"
-            />
-          </div>
-
-          {/* Theme Color */}
-          <div className="bg-card rounded-xl p-6 border border-border">
-            <div className="flex items-center gap-2 mb-4">
-              <Palette className="w-6 h-6" />
-              <label className="text-base font-medium">Cor do Tema</label>
-            </div>
-            <div className="grid grid-cols-5 gap-3">
-              {themeColors.map((color) => (
-                <button
-                  key={color.value}
-                  onClick={() => handleSave({ themeColor: color.value })}
-                  className={`aspect-square rounded-xl border-2 transition-all ${
-                    settings.themeColor === color.value
-                      ? 'border-foreground scale-110'
-                      : 'border-transparent hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                  title={color.name}
-                />
-              ))}
-            </div>
           </div>
 
           {/* Notifications */}
@@ -155,23 +197,46 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Backup */}
-          <button className="w-full bg-card rounded-xl p-6 border border-border hover:bg-muted/30 transition-colors text-left">
-            <div className="flex items-center gap-3">
-              <Download className="w-6 h-6" />
-              <div>
-                <div className="text-base font-medium">Backup & Exportação</div>
-                <div className="text-sm text-muted-foreground">Exportar dados do casal</div>
+          {/* Backup Section */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium text-muted-foreground px-2">Backup de Dados</h3>
+            
+            {/* Export Backup */}
+            <button 
+              onClick={handleExportBackup}
+              className="w-full bg-card rounded-xl p-6 border border-border hover:bg-muted/30 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <Download className="w-6 h-6" />
+                <div>
+                  <div className="text-base font-medium">Salvar Backup</div>
+                  <div className="text-sm text-muted-foreground">Exportar todos os dados</div>
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
 
-          {/* App Version */}
-          <div className="text-center pt-6">
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <Info className="w-4 h-4" />
-              <span>Versão 1.0.0</span>
-            </div>
+            {/* Import Backup */}
+            <button 
+              onClick={handleImportBackup}
+              className="w-full bg-card rounded-xl p-6 border border-border hover:bg-muted/30 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <Upload className="w-6 h-6" />
+                <div>
+                  <div className="text-base font-medium">Carregar Backup</div>
+                  <div className="text-sm text-muted-foreground">Restaurar dados salvos</div>
+                </div>
+              </div>
+            </button>
+            
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
         </div>
       )}

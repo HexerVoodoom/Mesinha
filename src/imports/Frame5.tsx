@@ -1,15 +1,15 @@
-import imgIconeMural from "@/assets/f55be14c67f2ee6191fde351aa33771fce7d5b93.png";
-import imgIconLembrete from "@/assets/5097108198344c1c84390e42ebe8df3ec16868c9.png";
-import imgIconData from "@/assets/e6ae93276b700b8f8f931da6519affe6c2e9c5d0.png";
-import imgIconBobeiras from "@/assets/44df7767036d0bbe143fb9ee3102554d9c29474f.png";
-import imgIconTop3 from "@/assets/f296c57b6ed7e73b350453d968fd883591dd3581.png";
-import imgIconFilmesESeries from "@/assets/a7e6f180afcfd6cefd1ae8165ed758a29e25da14.png";
-import imgIconPesquisar from "@/assets/cb1c8fe4b905e0ba73cec7627c5b9f5168142c03.png";
-import imgIconOutros from "@/assets/9598e760cce271dc861fb90f06a336792553ef6a.png";
-import imgIconLugares from "@/assets/d4ec5ae65b7bd51ce704f9bf07164532caa53a33.png";
-import imgIconcomidas from "@/assets/2c8cffafea0b456e1dfa9a773e633226de456ac0.png";
-import imgIconVideoGame from "@/assets/783a5ddb42e8653aa6debba484cc8b75c211df92.png";
-import imgIconVieosCurtos from "@/assets/b72dc3ec57224b4caa82c0bbb8e9602e4a8602e4.png";
+import imgIconeMural from "figma:asset/f55be14c67f2ee6191fde351aa33771fce7d5b93.png";
+import imgIconLembrete from "figma:asset/5097108198344c1c84390e42ebe8df3ec16868c9.png";
+import imgIconData from "figma:asset/e6ae93276b700b8f8f931da6519affe6c2e9c5d0.png";
+import imgIconBobeiras from "figma:asset/44df7767036d0bbe143fb9ee3102554d9c29474f.png";
+import imgIconTop3 from "figma:asset/f296c57b6ed7e73b350453d968fd883591dd3581.png";
+import imgIconFilmesESeries from "figma:asset/a7e6f180afcfd6cefd1ae8165ed758a29e25da14.png";
+import imgIconPesquisar from "figma:asset/cb1c8fe4b905e0ba73cec7627c5b9f5168142c03.png";
+import imgIconOutros from "figma:asset/9598e760cce271dc861fb90f06a336792553ef6a.png";
+import imgIconLugares from "figma:asset/d4ec5ae65b7bd51ce704f9bf07164532caa53a33.png";
+import imgIconcomidas from "figma:asset/2c8cffafea0b456e1dfa9a773e633226de456ac0.png";
+import imgIconVideoGame from "figma:asset/783a5ddb42e8653aa6debba484cc8b75c211df92.png";
+import imgIconVieosCurtos from "figma:asset/b72dc3ec57224b4caa82c0bbb8e9602e4a8602e4.png";
 
 export default function Frame() {
   return (

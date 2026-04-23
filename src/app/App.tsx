@@ -4,6 +4,8 @@ import { router } from './routes';
 import { Toaster } from 'sonner';
 import Login from './pages/Login';
 import { LoadingScreen } from './components/LoadingScreen';
+import { localDB } from './utils/localDB';
+import { syncService } from './utils/syncService';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,7 +17,19 @@ export default function App() {
     // Verificar se já existe um perfil salvo no localStorage
     const initializeApp = async () => {
       console.log('[App] Initializing app...');
-      
+
+      // Initialize local database
+      try {
+        await localDB.init();
+        console.log('[App] Local database initialized');
+
+        // Start auto-backup (every 30 minutes)
+        syncService.startAutoBackup(30);
+        console.log('[App] Auto-backup started');
+      } catch (error) {
+        console.error('[App] Failed to initialize local database:', error);
+      }
+
       const profile = localStorage.getItem('userProfile') as 'Amanda' | 'Mateus' | null;
       console.log('[App] Stored profile:', profile);
 
@@ -26,11 +40,16 @@ export default function App() {
       } else {
         console.log('[App] No valid profile found');
       }
-      
+
       setIsLoading(false);
     };
 
     initializeApp();
+
+    // Cleanup on unmount
+    return () => {
+      syncService.stopAutoBackup();
+    };
   }, []);
 
   const handleLoginSuccess = (profile: 'Amanda' | 'Mateus') => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import faviconImage from '@/assets/be6328a8ae35307c0da22bbdbf01ed618424fba1.png';
+import faviconImage from 'figma:asset/be6328a8ae35307c0da22bbdbf01ed618424fba1.png';
 
 export function NotificationPermissionBanner() {
   const [show, setShow] = useState(false);
