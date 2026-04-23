@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { syncService, SyncMode } from '../utils/syncService';
 import { googleDriveBackup } from '../utils/googleDriveBackup';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import { Card } from './ui/card';
 import { toast } from 'sonner';
 import {
